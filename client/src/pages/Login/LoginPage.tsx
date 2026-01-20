@@ -290,15 +290,12 @@ export const LoginPage: React.FC = () => {
 
               {/* Mode Toggle */}
               <div className="mt-8">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="bg-transparent px-4 text-slate-500">
-                      {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 border-t border-white/10" />
+                  <span className="text-sm text-slate-500 flex-shrink-0">
+                    {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}
+                  </span>
+                  <div className="flex-1 border-t border-white/10" />
                 </div>
 
                 <div className="mt-6">
