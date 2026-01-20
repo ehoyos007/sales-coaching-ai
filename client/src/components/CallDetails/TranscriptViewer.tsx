@@ -65,19 +65,22 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Safely get turns array, defaulting to empty array if undefined
+  const turns = transcript?.turns ?? [];
+
   // Filter turns based on selected filter and search query
   const filteredTurns = useMemo(() => {
-    let turns = transcript.turns;
+    let filteredList = turns;
 
     // Apply speaker filter
     if (filter === 'agent') {
-      turns = turns.filter((turn) => turn.speaker === 'Agent');
+      filteredList = filteredList.filter((turn) => turn.speaker === 'Agent');
     } else if (filter === 'customer') {
-      turns = turns.filter((turn) => turn.speaker === 'Customer');
+      filteredList = filteredList.filter((turn) => turn.speaker === 'Customer');
     }
 
-    return turns;
-  }, [transcript.turns, filter]);
+    return filteredList;
+  }, [turns, filter]);
 
   // Find turns that match search query
   const matchingTurnIds = useMemo(() => {
@@ -116,7 +119,7 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
             </p>
           </div>
           <span className="text-xs text-slate-500">
-            {filteredTurns.length} of {transcript.turns.length} turns
+            {filteredTurns.length} of {turns.length} turns
           </span>
         </div>
 
@@ -152,16 +155,16 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
         {/* Filter tabs */}
         <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
           {[
-            { id: 'all', label: 'All', count: transcript.turns.length },
+            { id: 'all', label: 'All', count: turns.length },
             {
               id: 'agent',
               label: 'Agent',
-              count: transcript.turns.filter((t) => t.speaker === 'Agent').length,
+              count: turns.filter((t) => t.speaker === 'Agent').length,
             },
             {
               id: 'customer',
               label: 'Customer',
-              count: transcript.turns.filter((t) => t.speaker === 'Customer').length,
+              count: turns.filter((t) => t.speaker === 'Customer').length,
             },
           ].map((tab) => (
             <button
