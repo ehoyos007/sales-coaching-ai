@@ -61,6 +61,15 @@ export async function handleGetTranscript(
       };
     }
 
+    // Parse the full_transcript into turns
+    const turns = transcript.full_transcript
+      ? transcriptsService.parseTranscriptText(
+          transcript.full_transcript,
+          callId,
+          callMetadata.agent_user_id
+        )
+      : [];
+
     return {
       success: true,
       data: {
@@ -76,7 +85,7 @@ export async function handleGetTranscript(
           customer: callMetadata.customer_talk_percentage,
         },
         total_turns: callMetadata.total_turns,
-        turns: transcript.turns,
+        turns,
       },
     };
   } catch (error) {

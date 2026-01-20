@@ -36,8 +36,10 @@ export async function formatResponse(context: FormatContext): Promise<string> {
       return formatTeamSummary(data);
 
     case Intent.GET_TRANSCRIPT:
-    case Intent.COACHING:
       return formatTranscript(data);
+
+    case Intent.COACHING:
+      return formatCoaching(data);
 
     case Intent.SEARCH_CALLS:
       return formatSearchResults(data);
@@ -193,6 +195,110 @@ function formatTranscript(data: Record<string, unknown>): string {
     }).join('\n\n');
 
     response += `### Transcript\n\n${formatted}`;
+  }
+
+  return response;
+}
+
+function formatCoaching(data: Record<string, unknown>): string {
+  // If we have a pre-generated summary from Claude, use it
+  if (data.summary) {
+    return data.summary as string;
+  }
+
+  // Otherwise, format the coaching analysis manually
+  const agentName = data.agent_name as string;
+  const callDate = data.call_date as string;
+  const duration = data.duration as string;
+  const analysis = data.analysis as {
+    scores: Record<string, number>;
+    overall_score: number;
+    performance_level: string;
+    strengths: string[];
+    improvements: string[];
+    action_items: string[];
+    red_flags: { critical: string[]; high: string[]; medium: string[] };
+  };
+
+  if (!analysis) {
+    return `Coaching analysis for ${agentName}'s call on ${callDate} is not available.`;
+  }
+
+  let response = `## Coaching Feedback for ${agentName}\n`;
+  response += `*Call: ${callDate} (${duration})*\n\n`;
+
+  // Overall score with emoji
+  const scoreEmoji = analysis.overall_score >= 4.5 ? '🌟' :
+                     analysis.overall_score >= 3.5 ? '✅' :
+                     analysis.overall_score >= 2.5 ? '📈' : '⚠️';
+
+  response += `### Overall Score: ${analysis.overall_score.toFixed(2)} ${scoreEmoji}\n`;
+  response += `**Performance Level:** ${analysis.performance_level}\n\n`;
+
+  // Score breakdown
+  response += `### Score Breakdown\n\n`;
+  response += `| Category | Score |\n`;
+  response += `|----------|-------|\n`;
+
+  const categoryNames: Record<string, string> = {
+    opening_rapport: 'Opening & Rapport',
+    needs_discovery: 'Needs Discovery',
+    product_presentation: 'Product Presentation',
+    objection_handling: 'Objection Handling',
+    compliance_disclosures: 'Compliance & Disclosures',
+    closing_enrollment: 'Closing & Enrollment',
+  };
+
+  for (const [key, score] of Object.entries(analysis.scores)) {
+    const emoji = score >= 4 ? '⭐' : score >= 3 ? '✓' : '⚠️';
+    const name = categoryNames[key] || key;
+    response += `| ${name} | ${score}/5 ${emoji} |\n`;
+  }
+
+  // Strengths
+  if (analysis.strengths && analysis.strengths.length > 0) {
+    response += `\n### 💪 Strengths\n\n`;
+    analysis.strengths.forEach((strength) => {
+      response += `- ${strength}\n`;
+    });
+  }
+
+  // Areas for improvement
+  if (analysis.improvements && analysis.improvements.length > 0) {
+    response += `\n### 📈 Areas for Improvement\n\n`;
+    analysis.improvements.forEach((improvement) => {
+      response += `- ${improvement}\n`;
+    });
+  }
+
+  // Action items
+  if (analysis.action_items && analysis.action_items.length > 0) {
+    response += `\n### ✅ Action Items\n\n`;
+    analysis.action_items.forEach((item, i) => {
+      response += `${i + 1}. ${item}\n`;
+    });
+  }
+
+  // Red flags
+  const hasCritical = analysis.red_flags.critical && analysis.red_flags.critical.length > 0;
+  const hasHigh = analysis.red_flags.high && analysis.red_flags.high.length > 0;
+
+  if (hasCritical || hasHigh) {
+    response += `\n### 🚨 Flags Requiring Attention\n\n`;
+
+    if (hasCritical) {
+      response += `**Critical:**\n`;
+      analysis.red_flags.critical.forEach((flag) => {
+        response += `- ❌ ${flag}\n`;
+      });
+    }
+
+    if (hasHigh) {
+      response += `**High Priority:**\n`;
+      analysis.red_flags.high.forEach((flag) => {
+        response += `- ⚠️ ${flag}\n`;
+      });
+    }
   }
 
   return response;
