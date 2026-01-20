@@ -10,7 +10,8 @@ Classify into ONE of these intents:
 - TEAM_SUMMARY: User wants team-wide stats (e.g., "team performance", "how's the sales team doing", "overall stats")
 - GET_TRANSCRIPT: User wants to see a specific call transcript (references a call_id or asks to "show me the transcript")
 - SEARCH_CALLS: User wants to find calls by content (e.g., "find calls where customer objected", "search for calls about Medicare")
-- COACHING: User wants coaching feedback on a call (e.g., "coaching tips", "how could they improve")
+- COACHING: User wants overall coaching feedback on a call (e.g., "coaching tips", "how could they improve", "rate this call")
+- OBJECTION_ANALYSIS: User wants deep-dive analysis of objections in a call (e.g., "what objections came up", "how did they handle objections", "analyze objections in this call", "what pushback did the customer give")
 - GENERAL: General question, greeting, help request, or anything that doesn't fit above
 
 Extract these parameters if present:

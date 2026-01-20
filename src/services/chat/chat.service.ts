@@ -154,6 +154,7 @@ function getDataType(intent: Intent): string {
     [Intent.GET_TRANSCRIPT]: 'transcript',
     [Intent.SEARCH_CALLS]: 'search_results',
     [Intent.COACHING]: 'coaching',
+    [Intent.OBJECTION_ANALYSIS]: 'objection_analysis',
     [Intent.GENERAL]: 'general',
   };
   return typeMap[intent] || 'general';

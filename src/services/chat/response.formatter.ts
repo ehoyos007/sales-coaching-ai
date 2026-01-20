@@ -41,6 +41,9 @@ export async function formatResponse(context: FormatContext): Promise<string> {
     case Intent.COACHING:
       return formatCoaching(data);
 
+    case Intent.OBJECTION_ANALYSIS:
+      return formatObjectionAnalysis(data);
+
     case Intent.SEARCH_CALLS:
       return formatSearchResults(data);
 
@@ -321,6 +324,103 @@ function formatCoaching(data: Record<string, unknown>): string {
   }
 
   return response;
+}
+
+function formatObjectionAnalysis(data: Record<string, unknown>): string {
+  // If we have a pre-generated summary from Claude, use it
+  if (data.summary) {
+    return data.summary as string;
+  }
+
+  // Otherwise, format the objection analysis manually
+  const agentName = data.agent_name as string;
+  const callDate = data.call_date as string;
+  const duration = data.duration as string;
+  const analysis = data.analysis as {
+    objections_found: Array<{
+      objection_type: string;
+      objection_text: string;
+      response_quality: number;
+      was_resolved: boolean;
+      improvement_suggestion: string;
+    }>;
+    overall_score: number | null;
+    total_objections: number;
+    resolved_count: number;
+    strongest_moment: { description: string; quote: string } | null;
+    biggest_opportunity: { description: string; suggestion: string } | null;
+    no_objections_note?: string;
+  };
+
+  if (!analysis) {
+    return `Objection analysis for ${agentName}'s call on ${callDate} is not available.`;
+  }
+
+  let response = `## Objection Analysis for ${agentName}\n`;
+  response += `*Call: ${callDate} (${duration})*\n\n`;
+
+  // Handle case with no objections
+  if (analysis.total_objections === 0) {
+    response += `No objections were identified in this call.\n\n`;
+    if (analysis.no_objections_note) {
+      response += `*Note: ${analysis.no_objections_note}*\n`;
+    }
+    return response;
+  }
+
+  // Summary stats
+  const resolvedPct = Math.round((analysis.resolved_count / analysis.total_objections) * 100);
+  response += `### Summary\n\n`;
+  response += `| Metric | Value |\n`;
+  response += `|--------|-------|\n`;
+  response += `| Total Objections | ${analysis.total_objections} |\n`;
+  response += `| Resolved | ${analysis.resolved_count} (${resolvedPct}%) |\n`;
+  if (analysis.overall_score !== null) {
+    const scoreEmoji = analysis.overall_score >= 4 ? '⭐' : analysis.overall_score >= 3 ? '✓' : '⚠️';
+    response += `| Handling Score | ${analysis.overall_score}/5 ${scoreEmoji} |\n`;
+  }
+
+  // Objections breakdown
+  if (analysis.objections_found.length > 0) {
+    response += `\n### Objections Found\n\n`;
+
+    analysis.objections_found.forEach((obj, i) => {
+      const resolvedEmoji = obj.was_resolved ? '✅' : '❌';
+      const qualityEmoji = obj.response_quality >= 4 ? '⭐' : obj.response_quality >= 3 ? '✓' : '⚠️';
+
+      response += `**${i + 1}. ${capitalize(obj.objection_type)}** ${resolvedEmoji}\n`;
+      response += `> "${obj.objection_text}"\n\n`;
+      response += `- Response Quality: ${obj.response_quality}/5 ${qualityEmoji}\n`;
+      if (obj.improvement_suggestion) {
+        response += `- 💡 ${obj.improvement_suggestion}\n`;
+      }
+      response += `\n`;
+    });
+  }
+
+  // Strongest moment
+  if (analysis.strongest_moment) {
+    response += `### 💪 Strongest Moment\n\n`;
+    response += `${analysis.strongest_moment.description}\n`;
+    if (analysis.strongest_moment.quote) {
+      response += `> "${analysis.strongest_moment.quote}"\n`;
+    }
+    response += `\n`;
+  }
+
+  // Biggest opportunity
+  if (analysis.biggest_opportunity) {
+    response += `### 📈 Biggest Opportunity\n\n`;
+    response += `${analysis.biggest_opportunity.description}\n`;
+    response += `**Suggestion:** ${analysis.biggest_opportunity.suggestion}\n`;
+  }
+
+  return response;
+}
+
+function capitalize(str: string): string {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
 }
 
 function formatSearchResults(data: Record<string, unknown>): string {

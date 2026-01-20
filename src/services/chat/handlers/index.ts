@@ -5,6 +5,7 @@ import { handleTeamSummary } from './team-summary.handler.js';
 import { handleGetTranscript } from './get-transcript.handler.js';
 import { handleSearchCalls } from './search-calls.handler.js';
 import { handleCoaching } from './coaching.handler.js';
+import { handleObjectionAnalysis } from './objection-analysis.handler.js';
 import { handleGeneral } from './general.handler.js';
 
 export type Handler = (params: HandlerParams, originalMessage: string) => Promise<HandlerResult>;
@@ -16,6 +17,7 @@ const handlers: Record<Intent, Handler> = {
   [Intent.GET_TRANSCRIPT]: handleGetTranscript,
   [Intent.SEARCH_CALLS]: handleSearchCalls,
   [Intent.COACHING]: handleCoaching,
+  [Intent.OBJECTION_ANALYSIS]: handleObjectionAnalysis,
   [Intent.GENERAL]: handleGeneral,
 };
 
@@ -30,5 +32,6 @@ export {
   handleGetTranscript,
   handleSearchCalls,
   handleCoaching,
+  handleObjectionAnalysis,
   handleGeneral,
 };

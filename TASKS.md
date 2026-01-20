@@ -15,16 +15,9 @@ Preparing for deployment and adding polish features
 
 ### High Priority
 
-- [ ] **Run database migration for conversation history**
-  - Description: Execute the migration in Supabase SQL Editor
-  - File: `supabase/migrations/20260120000000_add_chat_history.sql`
-  - Status: Code complete, awaiting migration execution
+*No high priority tasks at this time*
 
 ### Medium Priority
-
-- [ ] **Add Objection Analysis Handler**
-  - Description: Detect and analyze objections in calls, evaluate agent responses
-  - Files: `src/prompts/objection-analysis.ts`, new handler file
 
 - [ ] **Manager Configuration Panel (Phase 6)**
   - Description: UI for managers to customize coaching rubric weights and criteria
@@ -60,6 +53,13 @@ Preparing for deployment and adding polish features
 ---
 
 ## ✅ Done
+
+### Session 12 (2026-01-20)
+- [x] Added Objection Analysis Handler
+  - New intent type: `OBJECTION_ANALYSIS`
+  - New prompt file: `src/prompts/objection-analysis.ts`
+  - New handler: `src/services/chat/handlers/objection-analysis.handler.ts`
+  - Updated intent classification, handler registry, response formatter
 
 ### Session 8 (2026-01-20)
 - [x] Added session/conversation history support
