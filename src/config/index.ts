@@ -29,7 +29,10 @@ export const config = {
     embeddingModel: 'text-embedding-3-small',
   },
   cors: {
-    clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+    // Support multiple origins via comma-separated list
+    allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
+      .split(',')
+      .map(origin => origin.trim()),
   },
 } as const;
 

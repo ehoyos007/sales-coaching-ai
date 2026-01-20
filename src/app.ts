@@ -10,7 +10,16 @@ export function createApp(): Express {
 
   // Middleware
   app.use(cors({
-    origin: config.cors.clientUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (config.cors.allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   }));
   app.use(express.json());
