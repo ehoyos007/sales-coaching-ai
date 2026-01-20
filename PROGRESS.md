@@ -439,12 +439,12 @@ Frontend                          Backend                         Database
 - `data` JSONB
 - `token_count` INTEGER
 
-### Deployment Note
-The migration must be run in Supabase before deploying:
-```sql
--- Run in Supabase SQL Editor
--- Copy contents of supabase/migrations/20260120000000_add_chat_history.sql
+### Git Activity
 ```
+b0958d4 feat: add persistent conversation history
+```
+
+18 files changed, 863 insertions(+), 21 deletions(-)
 
 ### Next Steps
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
