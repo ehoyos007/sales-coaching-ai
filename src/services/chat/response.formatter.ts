@@ -134,26 +134,35 @@ function formatTeamSummary(data: Record<string, unknown>): string {
     return data.message as string || `No team data found for ${department}.`;
   }
 
-  const totalAgents = summary.total_agents as number;
+  // Handle the actual RPC response structure
   const totalCalls = summary.total_calls as number;
-  const avgCallsPerAgent = Math.round(summary.avg_calls_per_agent as number);
   const avgDuration = summary.avg_duration_seconds as number;
   const avgMins = Math.floor(avgDuration / 60);
   const avgSecs = Math.round(avgDuration % 60);
-  const topPerformer = summary.top_performer as { agent_name: string; call_count: number } | null;
+  const avgTalkPct = summary.avg_agent_talk_pct as number | undefined;
+  const totalTalkMinutes = summary.total_talk_time_minutes as number | undefined;
+  const topAgentName = summary.agent_name as string | undefined;
 
   let response = `## ${department} Team Summary\n`;
   response += `*${startDate} to ${endDate}*\n\n`;
 
   response += `| Metric | Value |\n`;
   response += `|--------|-------|\n`;
-  response += `| Active Agents | ${totalAgents} |\n`;
   response += `| Total Calls | ${totalCalls} |\n`;
-  response += `| Avg Calls/Agent | ${avgCallsPerAgent} |\n`;
-  response += `| Avg Duration | ${avgMins}m ${avgSecs}s |\n`;
+  response += `| Avg Call Duration | ${avgMins}m ${avgSecs}s |\n`;
 
-  if (topPerformer) {
-    response += `\n🏆 **Top Performer:** ${topPerformer.agent_name} with ${topPerformer.call_count} calls`;
+  if (avgTalkPct !== undefined) {
+    response += `| Avg Agent Talk % | ${Math.round(avgTalkPct)}% |\n`;
+  }
+
+  if (totalTalkMinutes !== undefined) {
+    const hours = Math.floor(totalTalkMinutes / 60);
+    const mins = Math.round(totalTalkMinutes % 60);
+    response += `| Total Talk Time | ${hours}h ${mins}m |\n`;
+  }
+
+  if (topAgentName) {
+    response += `\n🏆 **Top Performer:** ${topAgentName} with ${totalCalls} calls`;
   }
 
   response += '\n\nWant to dive deeper into any agent\'s performance?';

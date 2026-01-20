@@ -1,7 +1,7 @@
 # TASKS.md
 
 ## 🎯 Current Focus
-Completing Phase 3 (Coaching) and preparing for Phase 5 (Deploy)
+Preparing for deployment and adding polish features
 
 ---
 
@@ -15,30 +15,26 @@ Completing Phase 3 (Coaching) and preparing for Phase 5 (Deploy)
 
 ### High Priority
 
-- [ ] **Implement Coaching Handler**
-  - Description: Add coaching analysis that evaluates calls against a rubric and provides actionable feedback
-  - Files: `src/services/chat/handlers/coaching.handler.ts`, `src/prompts/coaching-analysis.ts`
-  - Notes: PRD has detailed coaching prompt template to use
-
-- [ ] **Fix Team Summary Response**
-  - Description: Database returns different columns than the response formatter expects
-  - Files: `src/services/chat/handlers/team-summary.handler.ts`, `src/services/chat/response.formatter.ts`
-  - Notes: Need to inspect actual RPC response and align
-
-- [ ] **Update PROGRESS.md with Session 2**
-  - Description: Log the frontend build session
-  - Files: `PROGRESS.md`
-
-### Medium Priority
-
 - [ ] **Add Session/Conversation History**
   - Description: Persist chat history so users can have contextual follow-up questions
   - Approach: Store in Supabase or implement in-memory session store
   - Dependencies: May need new database table
 
+- [ ] **Deploy to Production**
+  - Description: Set up hosting and deploy the application
+  - Platform: Vercel (frontend) + Railway/Render (backend)
+  - Checklist: See Deployment Checklist below
+
+### Medium Priority
+
 - [ ] **Add Objection Analysis Handler**
   - Description: Detect and analyze objections in calls, evaluate agent responses
   - Files: `src/prompts/objection-analysis.ts`, new handler file
+
+- [ ] **Manager Configuration Panel (Phase 6)**
+  - Description: UI for managers to customize coaching rubric weights and criteria
+  - Files: New frontend components, new API endpoints
+  - Notes: See PLAN.md for data model design
 
 - [ ] **Improve Error Messages**
   - Description: More user-friendly error messages when agent not found, no data, etc.
@@ -70,6 +66,31 @@ Completing Phase 3 (Coaching) and preparing for Phase 5 (Deploy)
 
 ## ✅ Done
 
+### Session 7 (2026-01-20)
+- [x] Updated TASKS.md to reflect current project status
+- [x] Fixed team summary response formatting (aligned formatter with actual RPC response)
+
+### Session 6 (2026-01-20)
+- [x] Designed and implemented coaching rubric with 6 scoring categories
+- [x] Created coaching analysis prompts
+- [x] Implemented coaching handler with rubric-based analysis
+- [x] Added coaching response formatter with score breakdown
+- [x] Fixed get-transcript handler transcript.turns parsing
+- [x] Updated PLAN.md with Phase 6 (Manager Configuration Panel)
+
+### Session 5 (2026-01-20)
+- [x] Fixed transcript data not displaying (field name mismatch)
+- [x] Added parseTranscriptText() to convert full_transcript to CallTurn[]
+- [x] Fixed modal scroll with min-h-0 on flex containers
+
+### Session 4 (2026-01-20)
+- [x] Fixed TranscriptViewer crash (null-safe access for turns array)
+
+### Session 3 (2026-01-20)
+- [x] Created project documentation (CONTEXT.md, PLAN.md, TASKS.md)
+- [x] Verified full-stack application runs correctly
+- [x] Committed and pushed all changes
+
 ### Session 2 (2026-01-20)
 - [x] Set up React frontend with Vite, TypeScript, Tailwind CSS
 - [x] Build Chat components (ChatContainer, ChatMessage, ChatInput, ChatHeader)
@@ -99,7 +120,6 @@ Completing Phase 3 (Coaching) and preparing for Phase 5 (Deploy)
 
 | Issue | Description | Workaround |
 |-------|-------------|------------|
-| Team summary formatting | Returns different columns than expected | Response still works but not optimal formatting |
 | Port conflict | Backend uses 3001 instead of 3000 | Intentional - 3000 was in use |
 
 ---
