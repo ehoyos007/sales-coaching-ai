@@ -55,7 +55,8 @@ const ChatPage: React.FC = () => {
       setSelectedAgentId(agent.agent_user_id);
       setContext({ agent_user_id: agent.agent_user_id });
       // Optionally send a message about the selected agent
-      sendMessage(`Tell me about ${agent.first_name}'s performance`);
+      const agentName = agent.first_name || agent.email || 'this agent';
+      sendMessage(`Tell me about ${agentName}'s performance`);
       // Close sidebar on mobile
       setIsSidebarOpen(false);
     },

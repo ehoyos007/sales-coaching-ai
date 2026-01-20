@@ -41,6 +41,11 @@ export const config = {
   // Shorthand exports for auth service
   supabaseUrl: requireEnv('SUPABASE_URL'),
   supabaseServiceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
+  // Sentry
+  sentry: {
+    dsn: process.env.SENTRY_DSN || '',
+    enabled: !!process.env.SENTRY_DSN,
+  },
 } as const;
 
 export type Config = typeof config;

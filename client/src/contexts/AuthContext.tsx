@@ -16,6 +16,7 @@ import {
   getToken,
   clearToken,
 } from '../services/api';
+import { setSentryUser, clearSentryUser } from '../lib/sentry';
 
 // Combined user object that merges AuthUser with profile data for convenience
 export interface CombinedUser {
@@ -108,6 +109,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (response.success && response.data) {
             setAuthUser(response.data.user);
             setProfile(response.data.profile);
+            // Set Sentry user context
+            setSentryUser({
+              id: response.data.user.id,
+              email: response.data.user.email,
+              role: response.data.profile.role,
+            });
           } else {
             // Token is invalid, clear it
             clearToken();
@@ -133,6 +140,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (response.data) {
       setAuthUser(response.data.user);
       setProfile(response.data.profile);
+      // Set Sentry user context
+      setSentryUser({
+        id: response.data.user.id,
+        email: response.data.user.email,
+        role: response.data.profile.role,
+      });
     }
   }, []);
 
@@ -159,6 +172,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAuthUser(null);
       setProfile(null);
       clearToken();
+      // Clear Sentry user context
+      clearSentryUser();
     }
   }, []);
 

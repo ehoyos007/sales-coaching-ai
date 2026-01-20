@@ -1,5 +1,9 @@
+import { initSentry } from './lib/sentry.js';
 import { createApp } from './app.js';
 import { config } from './config/index.js';
+
+// Initialize Sentry first to capture all errors
+initSentry();
 
 const app = createApp();
 

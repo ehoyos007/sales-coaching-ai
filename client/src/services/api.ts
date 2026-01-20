@@ -1,3 +1,4 @@
+import { captureError } from '../lib/sentry';
 import type {
   Agent,
   ApiResponse,
@@ -97,12 +98,19 @@ async function request<T>(
     return data;
   } catch (error) {
     if (error instanceof ApiError) {
+      // Capture 5xx errors to Sentry
+      if (error.status >= 500) {
+        captureError(error, { endpoint, status: error.status });
+      }
       throw error;
     }
-    throw new ApiError(
+    // Capture unexpected errors
+    const apiError = new ApiError(
       error instanceof Error ? error.message : 'Network error',
       0
     );
+    captureError(apiError, { endpoint, originalError: error });
+    throw apiError;
   }
 }
 

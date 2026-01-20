@@ -83,11 +83,11 @@ export const AgentList: React.FC<AgentListProps> = ({
                       : 'bg-slate-200 text-slate-600'
                   }`}
                 >
-                  {agent.first_name.charAt(0).toUpperCase()}
+                  {(agent.first_name || agent.email || '?').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {agent.first_name}
+                    {agent.first_name || agent.email || 'Unknown Agent'}
                   </p>
                   {agent.extension && (
                     <p className="text-xs text-slate-500">

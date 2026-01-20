@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Sentry } from '../lib/sentry.js';
 
 export interface ApiError extends Error {
   statusCode?: number;
@@ -10,7 +11,7 @@ export interface ApiError extends Error {
  */
 export function errorHandler(
   err: ApiError,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void {
@@ -18,6 +19,26 @@ export function errorHandler(
 
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
+
+  // Capture 5xx errors to Sentry
+  if (statusCode >= 500) {
+    Sentry.withScope((scope) => {
+      scope.setTag('status_code', statusCode.toString());
+      scope.setExtra('url', req.url);
+      scope.setExtra('method', req.method);
+      scope.setExtra('body', req.body);
+
+      // Add user context if available
+      if (req.user) {
+        scope.setUser({
+          id: req.user.id,
+          email: req.user.email,
+        });
+      }
+
+      Sentry.captureException(err);
+    });
+  }
 
   res.status(statusCode).json({
     success: false,
