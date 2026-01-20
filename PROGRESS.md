@@ -1045,3 +1045,69 @@ curl http://localhost:5173/api/v1/auth/signin → {"success":false,"error":"Inva
 - [ ] Performance monitoring
 - [ ] Add password reset flow
 - [ ] Add email verification for new signups
+
+---
+
+## 2026-01-20 — Session 18
+
+### Summary
+Diagnosed and fixed 404 error on auth routes in production — root cause was Railway not being connected to GitHub repo.
+
+### Completed
+- [x] Diagnosed "Route not found: POST /api/v1/auth/signin" 404 error
+- [x] Traced route chain: app.ts → routes/index.ts → auth.routes.ts (all correct)
+- [x] Verified local build compiles and routes load correctly
+- [x] Discovered Railway hadn't deployed in 3+ hours (running pre-auth code)
+- [x] User connected Railway to GitHub repository
+- [x] Auth routes now working in production
+- [x] Verified Vercel frontend deployment is live
+- [x] Triggered Vercel deployment sync
+
+### Root Cause
+Railway was not connected to the GitHub repository, so none of the commits after the auth implementation had been deployed. Production was running old code from before auth routes existed.
+
+### Attempted Fixes (before finding root cause)
+1. Created `nixpacks.toml` to ensure devDependencies installed
+2. Moved `typescript` from devDependencies to dependencies
+3. Added `postinstall` script to run build
+4. Added version identifier to health endpoint for deployment verification
+
+### Verification
+```bash
+# Production auth endpoint - now working
+curl -X POST https://sales-coaching-api-production.up.railway.app/api/v1/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test"}'
+# Returns 401 (auth error) instead of 404 - route is registered!
+```
+
+### Files Changed
+- `nixpacks.toml` — New: Railway/Nixpacks build configuration
+- `package.json` — Moved typescript to dependencies, added postinstall
+- `Procfile` — Simplified to just `npm start`
+- `src/routes/index.ts` — Added version identifier to health endpoint
+
+### Production Status
+| Service | Status | URL |
+|---------|--------|-----|
+| Backend (Railway) | ✓ Live | https://sales-coaching-api-production.up.railway.app |
+| Frontend (Vercel) | ✓ Live | https://sales-coaching-ai.vercel.app |
+| Auth Routes | ✓ Working | /api/v1/auth/signin, /signup, /signout, /me |
+
+### Git Activity
+```
+75f212f fix: ensure devDependencies installed for TypeScript build on Railway
+0be6161 fix: move typescript to dependencies for Railway build
+b77fc3f fix: add postinstall script to ensure build runs on Railway
+c281a1c chore: add version identifier to health endpoint for deployment verification
+07ac776 chore: trigger Vercel production deployment
+```
+
+### Key Lesson
+When debugging production issues, always verify that deployments are actually happening. Check the deployment platform's dashboard for recent deployments before diving into code changes.
+
+### Next Steps
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
+- [ ] Add password reset flow
+- [ ] Add email verification for new signups
