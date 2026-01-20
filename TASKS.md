@@ -19,11 +19,6 @@ Preparing for deployment and adding polish features
 
 ### Medium Priority
 
-- [ ] **Manager Configuration Panel (Phase 6)**
-  - Description: UI for managers to customize coaching rubric weights and criteria
-  - Files: New frontend components, new API endpoints
-  - Notes: See PLAN.md for data model design
-
 - [ ] **Improve Error Messages**
   - Description: More user-friendly error messages when agent not found, no data, etc.
   - Files: `src/services/chat/handlers/*.ts`
@@ -53,6 +48,20 @@ Preparing for deployment and adding polish features
 ---
 
 ## ✅ Done
+
+### Session 15 (2026-01-20)
+- [x] Tested coaching analysis with dynamic rubric end-to-end
+- [x] Verified rubric config ID and version returned in coaching response
+- [x] Confirmed all 6 categories, weights, and scoring criteria working
+
+### Session 13-14 (2026-01-20)
+- [x] Manager Configuration Panel (Phase 6) fully implemented
+  - Database migrations for rubric config tables
+  - REST API endpoints for rubric CRUD operations
+  - Frontend settings page with category weights, scoring criteria, red flags editors
+  - Version history with restore functionality
+  - Dynamic coaching prompt builder
+  - Deployed to production (Railway + Vercel)
 
 ### Session 12 (2026-01-20)
 - [x] Added Objection Analysis Handler
@@ -156,4 +165,4 @@ Preparing for deployment and adding polish features
 
 ---
 
-**Last Updated:** 2026-01-20
+**Last Updated:** 2026-01-20 (Session 15)

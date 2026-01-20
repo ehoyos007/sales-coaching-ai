@@ -849,7 +849,61 @@ Deployed Manager Configuration Panel to production (Railway backend + Vercel fro
   - Restore previous versions
 
 ### Next Steps
-- [ ] Test end-to-end coaching analysis with dynamic rubric
+- [x] Test end-to-end coaching analysis with dynamic rubric
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
 - [ ] Performance monitoring
+
+---
+
+## 2026-01-20 — Session 15
+
+### Summary
+Tested and verified the coaching analysis uses the dynamic rubric configuration from the database.
+
+### Completed
+- [x] Verified both local and production backends are running
+- [x] Confirmed rubric is seeded in database (6 categories, 12 red flags)
+- [x] Tested coaching analysis on a real call (Aaron, 31-minute call)
+- [x] Verified response includes rubric_config_id and rubric_version
+- [x] Confirmed all 6 categories score correctly with proper weights
+- [x] Updated TASKS.md to reflect Manager Config Panel completion
+- [x] Updated documentation
+
+### Test Results
+
+**Coaching Analysis Test:**
+```
+Call ID: 2b32115e-4411-40d3-9d46-f387be6df9ff-f2f51f5c-d446-45be-8b8f-b086d8b160fd
+Agent: Aaron
+Duration: 31:28
+Overall Score: 3.7/5.0 (Solid Performer)
+Rubric Config ID: a0000000-0000-0000-0000-000000000001
+Rubric Version: 1
+```
+
+**Category Scores (using database rubric):**
+| Category | Weight | Score |
+|----------|--------|-------|
+| Opening & Rapport | 10% | 3/5 |
+| Needs Discovery & Qualification | 30% | 4/5 |
+| Product Presentation | 20% | 4/5 |
+| Objection Handling | 20% | 3/5 |
+| Compliance & Disclosures | 10% | 4/5 |
+| Closing & Enrollment | 10% | 4/5 |
+
+### Key Verification Points
+1. **Dynamic Rubric Fetch**: Handler fetches active rubric from `coaching_rubric_config` table
+2. **Prompt Building**: `buildDynamicCoachingPrompt()` generates prompts from database config
+3. **Response Tracking**: `rubric_config_id` and `rubric_version` included in response
+4. **Fallback**: If no rubric exists, falls back to hardcoded prompts
+
+### Files Changed
+- `TASKS.md` — Updated with Session 13-15 completions
+- `PROGRESS.md` — Added Session 15 notes
+
+### Next Steps
+- [ ] Add authentication
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
+- [ ] Consider adding rubric A/B testing capability
