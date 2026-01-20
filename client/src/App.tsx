@@ -1,0 +1,141 @@
+import React, { useState, useCallback } from 'react';
+import { ChatContainer } from './components/Chat/ChatContainer';
+import { ChatHeader } from './components/Chat/ChatHeader';
+import { Sidebar } from './components/Sidebar/Sidebar';
+import { CallDetailsModal } from './components/CallDetails/CallDetailsModal';
+import { useChat } from './hooks/useChat';
+import { useAgents } from './hooks/useAgents';
+import { useCalls } from './hooks/useCalls';
+import type { Agent } from './types';
+
+const App: React.FC = () => {
+  // Chat state
+  const {
+    messages,
+    isLoading,
+    sendMessage,
+    setContext,
+    clearMessages,
+  } = useChat();
+
+  // Agents state
+  const {
+    agents,
+    isLoading: isLoadingAgents,
+    error: agentsError,
+  } = useAgents();
+
+  // Call details state
+  const {
+    callDetails,
+    transcript,
+    isLoading: isLoadingCall,
+    error: callError,
+    fetchCallDetails,
+    fetchTranscript,
+    clearCallData,
+  } = useCalls();
+
+  // UI state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+
+  // Handle agent selection from sidebar
+  const handleAgentSelect = useCallback(
+    (agent: Agent) => {
+      setSelectedAgentId(agent.agent_user_id);
+      setContext({ agent_user_id: agent.agent_user_id });
+      // Optionally send a message about the selected agent
+      sendMessage(`Tell me about ${agent.first_name}'s performance`);
+      // Close sidebar on mobile
+      setIsSidebarOpen(false);
+    },
+    [setContext, sendMessage]
+  );
+
+  // Handle quick action from sidebar
+  const handleQuickAction = useCallback(
+    (prompt: string) => {
+      sendMessage(prompt);
+      // Close sidebar on mobile
+      setIsSidebarOpen(false);
+    },
+    [sendMessage]
+  );
+
+  // Handle call click from chat messages
+  const handleCallClick = useCallback(
+    async (callId: string) => {
+      setIsCallModalOpen(true);
+      await Promise.all([fetchCallDetails(callId), fetchTranscript(callId)]);
+    },
+    [fetchCallDetails, fetchTranscript]
+  );
+
+  // Handle call modal close
+  const handleCloseCallModal = useCallback(() => {
+    setIsCallModalOpen(false);
+    clearCallData();
+  }, [clearCallData]);
+
+  // Handle sidebar toggle
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
+
+  // Handle clear chat
+  const handleClearChat = useCallback(() => {
+    clearMessages();
+    setSelectedAgentId(undefined);
+    setContext({});
+  }, [clearMessages, setContext]);
+
+  return (
+    <div className="flex h-screen w-full bg-slate-50">
+      {/* Sidebar */}
+      <Sidebar
+        agents={agents}
+        isLoadingAgents={isLoadingAgents}
+        agentsError={agentsError}
+        selectedAgentId={selectedAgentId}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        onAgentSelect={handleAgentSelect}
+        onQuickAction={handleQuickAction}
+      />
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <ChatHeader
+          onToggleSidebar={toggleSidebar}
+          isSidebarOpen={isSidebarOpen}
+          onClearChat={handleClearChat}
+        />
+
+        {/* Chat container */}
+        <div className="flex-1 min-h-0">
+          <ChatContainer
+            messages={messages}
+            isLoading={isLoading}
+            onSendMessage={sendMessage}
+            onCallClick={handleCallClick}
+          />
+        </div>
+      </div>
+
+      {/* Call Details Modal */}
+      <CallDetailsModal
+        isOpen={isCallModalOpen}
+        onClose={handleCloseCallModal}
+        callDetails={callDetails}
+        transcript={transcript}
+        isLoading={isLoadingCall}
+        error={callError}
+      />
+    </div>
+  );
+};
+
+export default App;

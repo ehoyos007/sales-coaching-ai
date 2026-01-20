@@ -54,3 +54,52 @@ Implemented the complete Node.js/TypeScript backend for the Sales Coaching AI ch
 - [ ] Improve team summary response formatting (database returns different columns than expected)
 - [ ] Add session/conversation history support
 - [ ] Deploy to production environment
+
+---
+
+## 2026-01-20 — Session 2
+
+### Summary
+Built the complete React frontend with chat interface, sidebar, and call details modal.
+
+### Completed
+- [x] React + Vite + TypeScript project setup in `/client`
+- [x] Tailwind CSS configuration with custom color palette
+- [x] Chat components (ChatContainer, ChatMessage, ChatInput, ChatHeader)
+- [x] Sidebar with tabs (Quick Actions, Agent List by department)
+- [x] CallDetails modal with transcript viewer and metrics
+- [x] Common components (LoadingSpinner, TypingIndicator, MarkdownRenderer)
+- [x] Custom hooks (useChat, useAgents, useCalls)
+- [x] API service layer with Vite proxy to backend
+- [x] Responsive design (desktop sidebar + mobile collapsible)
+- [x] Production build verification
+
+### Files Changed
+- `client/package.json` — Frontend dependencies
+- `client/tsconfig.json` — TypeScript configuration
+- `client/vite.config.ts` — Vite config with proxy to port 3001
+- `client/tailwind.config.js` — Tailwind with custom colors
+- `client/postcss.config.js` — PostCSS config
+- `client/index.html` — HTML entry point
+- `client/src/main.tsx` — React entry point
+- `client/src/App.tsx` — Main app component
+- `client/src/components/Chat/` — 4 chat components + index
+- `client/src/components/Sidebar/` — 3 sidebar components + index
+- `client/src/components/CallDetails/` — 3 modal components + index
+- `client/src/components/common/` — 2 utility components + index
+- `client/src/hooks/` — 3 custom hooks + index
+- `client/src/services/api.ts` — API client
+- `client/src/types/index.ts` — TypeScript interfaces
+- `client/src/styles/globals.css` — Global styles + Tailwind
+
+### Decisions Made
+- **Vite proxy**: API calls go to `/api` which proxies to `localhost:3001`
+- **react-markdown + remark-gfm**: For rendering AI responses with GFM support
+- **Tabbed sidebar**: Quick Actions and Agents in separate tabs for cleaner UX
+- **Department grouping**: Agents grouped by department in sidebar
+
+### Next Steps
+- [ ] Implement coaching handler in backend
+- [ ] Fix team summary response formatting
+- [ ] Add session/conversation history support
+- [ ] Deploy to production
