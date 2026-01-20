@@ -274,7 +274,89 @@ Designed and implemented the complete coaching handler with rubric-based call an
 ```
 
 ### Next Steps
-- [ ] Fix team summary response formatting
+- [x] Fix team summary response formatting
 - [ ] Add session/conversation history support
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
-- [ ] Deploy to production
+- [x] Deploy to production
+
+---
+
+## 2026-01-20 — Session 7
+
+### Summary
+Fixed team summary formatting, updated project documentation, and deployed full-stack application to production.
+
+### Completed
+- [x] Updated TASKS.md to reflect current project status (coaching handler done)
+- [x] Fixed team summary response formatting (aligned with actual RPC response)
+- [x] Added environment variable support for frontend API URL (`VITE_API_URL`)
+- [x] Updated CORS to support multiple origins via `ALLOWED_ORIGINS`
+- [x] Created Railway project and deployed backend
+- [x] Created Vercel project and deployed frontend
+- [x] Configured all production environment variables
+- [x] Set up custom domain alias on Vercel
+- [x] Committed and pushed all deployment configuration
+
+### Files Changed
+- `TASKS.md` — Updated with Session 7 completions, reorganized priorities
+- `src/services/chat/response.formatter.ts` — Fixed `formatTeamSummary()` to use actual RPC columns
+- `src/config/index.ts` — Changed `clientUrl` to `allowedOrigins` array
+- `src/app.ts` — Updated CORS middleware for multiple origins
+- `.env.example` — Updated with `ALLOWED_ORIGINS` variable
+- `client/src/services/api.ts` — Added `VITE_API_URL` environment variable support
+- `client/src/vite-env.d.ts` — TypeScript declarations for Vite env
+- `client/.env.example` — New: Frontend environment template
+- `client/vercel.json` — New: Vercel deployment configuration
+- `Procfile` — New: Railway deployment configuration
+
+### Bug Fix: Team Summary
+**Problem:** Formatter expected columns that didn't exist (`total_agents`, `avg_calls_per_agent`, `top_performer`)
+
+**Actual RPC returns:**
+- `total_calls`
+- `avg_duration_seconds`
+- `avg_agent_talk_pct`
+- `total_talk_time_minutes`
+- `agent_name`
+
+**Fix:** Updated formatter to use actual column names, displays total calls, avg duration, talk percentage, and total talk time.
+
+### Deployment Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         PRODUCTION                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│   Frontend (Vercel)              Backend (Railway)          │
+│   ┌─────────────────┐           ┌─────────────────┐        │
+│   │ React + Vite    │  ──API──▶ │ Express + TS    │        │
+│   │ Tailwind CSS    │           │ Claude AI       │        │
+│   └─────────────────┘           │ OpenAI Embed    │        │
+│                                 └────────┬────────┘        │
+│                                          │                  │
+│                                          ▼                  │
+│                                 ┌─────────────────┐        │
+│                                 │    Supabase     │        │
+│                                 │   PostgreSQL    │        │
+│                                 └─────────────────┘        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Production URLs
+| Service | URL |
+|---------|-----|
+| Frontend | https://sales-coaching-ai.vercel.app |
+| Backend API | https://sales-coaching-api-production.up.railway.app |
+
+### Git Activity
+```
+4b946b7 fix: align team summary formatter with actual RPC response
+ed4ab9f chore(deploy): add Railway and Vercel deployment configuration
+```
+
+### Next Steps
+- [ ] Add session/conversation history support
+- [ ] Manager Configuration Panel (Phase 6) for rubric customization
+- [ ] Add authentication
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
