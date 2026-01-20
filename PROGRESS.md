@@ -621,6 +621,63 @@ e5ae9d1 fix: handle null/undefined values in talk ratio formatting
 ```
 
 ### Next Steps
+- [x] Add Objection Analysis Handler
+
+---
+
+## 2026-01-20 — Session 12
+
+### Summary
+Implemented the Objection Analysis Handler for deep-dive analysis of objections in sales calls.
+
+### Completed
+- [x] Added `OBJECTION_ANALYSIS` intent to intent types
+- [x] Updated intent classification prompt to recognize objection queries
+- [x] Created `src/prompts/objection-analysis.ts` with analysis and summary prompts
+- [x] Created `src/services/chat/handlers/objection-analysis.handler.ts`
+- [x] Registered handler in handler registry
+- [x] Added `formatObjectionAnalysis()` to response formatter
+- [x] Updated chat service data type mapping
+- [x] Tested locally - working
+- [x] Deployed to production (Vercel + Railway)
+
+### Files Changed
+- `src/types/intent.types.ts` — Added OBJECTION_ANALYSIS intent
+- `src/prompts/intent-classification.ts` — Updated classification descriptions
+- `src/prompts/objection-analysis.ts` — New: Analysis and summary prompts
+- `src/services/chat/handlers/objection-analysis.handler.ts` — New: Handler implementation
+- `src/services/chat/handlers/index.ts` — Registered new handler
+- `src/services/chat/response.formatter.ts` — Added objection analysis formatter
+- `src/services/chat/chat.service.ts` — Added data type mapping
+- `TASKS.md` — Updated task tracking
+
+### Feature Details
+
+**Trigger phrases:**
+- "What objections came up in this call?"
+- "How did they handle objections?"
+- "Analyze objections in call [id]"
+
+**Analysis includes:**
+- Each objection found with customer quote
+- Objection type (price, timing, spouse, coverage, trust, etc.)
+- Agent response quality score (1-5)
+- Techniques used and missed
+- Whether objection was resolved
+- Improvement suggestions
+- Strongest moment and biggest opportunity
+- Patterns in agent tendencies
+
+### Git Activity
+```
+edce49b feat(chat): add objection analysis handler for deep-dive objection review
+```
+
+### Production URLs
+- Frontend: https://sales-coaching-ai.vercel.app
+- Backend: https://sales-coaching-api-production.up.railway.app
+
+### Next Steps
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
