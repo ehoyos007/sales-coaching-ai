@@ -908,7 +908,99 @@ Rubric Version: 1
 ```
 
 ### Next Steps
-- [ ] Add authentication
+- [x] Add authentication
 - [ ] Set up error tracking (Sentry)
 - [ ] Performance monitoring
 - [ ] Consider adding rubric A/B testing capability
+
+---
+
+## 2026-01-20 — Session 16
+
+### Summary
+Implemented full authentication system with role-based access control (RBAC) for both backend and frontend.
+
+### Completed
+- [x] Backend auth service with Supabase Auth integration
+- [x] Auth middleware for authentication, authorization, data scoping
+- [x] Auth routes (signup, signin, signout, profile)
+- [x] Admin routes (user management, team management)
+- [x] Protected all existing routes with authentication
+- [x] Data scoping by role (agent=own, manager=team, admin=all)
+- [x] Frontend AuthContext and useAuth hook
+- [x] Login page with sign in/sign up toggle
+- [x] ProtectedRoute component with role-based access
+- [x] UserMenu component with role badges and dropdown
+- [x] Admin panel for user/team management
+- [x] Fixed CORS for localhost:5173 and 5174
+- [x] Fixed RLS bypass by using shared database client
+
+### Architecture
+
+**Authentication Flow:**
+```
+User → Login Page → POST /auth/signin → Supabase Auth → JWT Token
+                                      → user_profiles table → Profile
+Token stored in localStorage → Auto-attached to all API requests
+```
+
+**Role-Based Access:**
+| Role | Data Access | Features |
+|------|-------------|----------|
+| Agent | Own calls only | Chat, coaching |
+| Manager | Team calls (or floor-wide) | + Team summaries |
+| Admin | All calls | + User/team management, rubric config |
+
+**Data Scoping:**
+- Middleware detects "floor-wide" keywords in queries
+- Managers get team scope by default, floor-wide on request
+- Admins always get floor-wide access
+
+### Files Created
+
+**Backend (9 files):**
+- `src/services/auth/auth.service.ts` — Auth service with signup, signin, token verification
+- `src/middleware/auth.middleware.ts` — authenticate, requireRole, scopeDataAccess
+- `src/routes/auth.routes.ts` — /auth/signup, /signin, /signout, /me
+- `src/routes/admin.routes.ts` — /admin/users, /admin/teams
+
+**Frontend (12 files):**
+- `client/src/contexts/AuthContext.tsx` — Global auth state
+- `client/src/hooks/useAuth.ts` — Auth hook with role helpers
+- `client/src/types/auth.types.ts` — Auth TypeScript types
+- `client/src/pages/Login/LoginPage.tsx` — Login/signup form
+- `client/src/components/ProtectedRoute.tsx` — Route protection
+- `client/src/components/UserMenu/UserMenu.tsx` — User dropdown menu
+- `client/src/components/common/RoleBadge.tsx` — Role badge component
+- `client/src/pages/Admin/AdminPage.tsx` — Admin panel
+- `client/src/pages/Admin/components/UserTable.tsx` — User management
+- `client/src/pages/Admin/components/TeamList.tsx` — Team management
+
+### Files Modified
+- `src/config/index.ts` — Added ALLOWED_ORIGINS, supabaseUrl exports
+- `src/routes/index.ts` — Added auth and admin routes
+- `src/routes/*.ts` — All routes now require authentication
+- `src/controllers/chat.controller.ts` — Pass user context and data scope
+- `src/services/chat/chat.service.ts` — Data access validation
+- `src/types/intent.types.ts` — Added DataAccessScope, UserContext
+- `client/src/services/api.ts` — Token management, auth headers, admin API
+- `client/src/types/index.ts` — Export auth types
+- `client/src/App.tsx` — AuthProvider, protected routes
+- `client/src/components/Chat/ChatHeader.tsx` — Added UserMenu
+- `.env` — Added ALLOWED_ORIGINS
+
+### Issues Resolved
+1. **CORS Error**: Frontend on port 5174, backend only allowed 5173 → Added both to ALLOWED_ORIGINS
+2. **RLS Infinite Recursion**: Auth service client triggered RLS → Used shared dbClient that bypasses RLS
+
+### Git Activity
+```
+4e67acf feat(auth): implement full authentication with RBAC
+```
+
+### Next Steps
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
+- [ ] Consider adding rubric A/B testing capability
+- [ ] Add password reset flow
+- [ ] Add email verification for new signups
