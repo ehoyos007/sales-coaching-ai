@@ -512,7 +512,11 @@ Fixed CORS issues and consolidated Vercel deployment to single project.
 63f0846 debug(cors): add detailed logging for CORS debugging
 41951a8 fix(cors): strip trailing slashes from allowed origins
 5d79599 chore: remove CORS debug logging
+cc3408f chore: consolidate Vercel deployment to sales-coaching-ai project
 ```
+
+### Cleanup
+- Deleted deprecated Vercel project "client" via CLI (`vercel project rm client`)
 
 ### Next Steps
 - [ ] Fix Talk Ratio NaN% bug in agent stats formatter
