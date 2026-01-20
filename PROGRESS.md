@@ -799,8 +799,57 @@ Implemented the Manager Configuration Panel for customizable coaching rubric wit
 5. **Visual Feedback**: Distribution bar shows weight allocation visually
 
 ### Next Steps
-- [ ] Run database migrations in production
-- [ ] Deploy backend and frontend
+- [x] Run database migrations in production
+- [x] Deploy backend and frontend
 - [ ] Test end-to-end with real coaching analysis
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
+
+---
+
+## 2026-01-20 — Session 14
+
+### Summary
+Deployed Manager Configuration Panel to production (Railway backend + Vercel frontend).
+
+### Completed
+- [x] User ran database migrations in Supabase production
+- [x] Linked Railway CLI to `sales-coaching-api` service
+- [x] Deployed backend to Railway (build + deploy successful)
+- [x] Deployed frontend to Vercel production
+- [x] Verified rubric API endpoint working (`/api/v1/rubric`)
+- [x] Confirmed all 6 categories, 12 red flags, and scoring criteria seeded
+
+### Deployment Details
+
+**Railway Backend:**
+- Deployment ID: `3a92b7a7-a7f5-452b-ae90-9ebaacc7b201`
+- Status: SUCCESS
+- URL: https://sales-coaching-api-production.up.railway.app
+
+**Vercel Frontend:**
+- Status: Ready
+- URL: https://client-iv3gz3tdn-enzo-hoyos-projects.vercel.app
+- Production: https://sales-coaching-ai.vercel.app
+
+### Verified Features
+- Rubric API returns full configuration:
+  - 6 categories with weights (10%, 30%, 20%, 20%, 10%, 10%)
+  - Scoring criteria (1-5) for each category
+  - 12 red flags across 3 severity levels
+  - Version 1 active
+
+### Production Access
+- **Settings Page:** Navigate to `/settings/rubric` or click gear icon in sidebar
+- **Features Available:**
+  - View/edit category weights
+  - Customize scoring criteria text
+  - Toggle/configure red flags
+  - Save as new versions
+  - Restore previous versions
+
+### Next Steps
+- [ ] Test end-to-end coaching analysis with dynamic rubric
+- [ ] Add authentication
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
