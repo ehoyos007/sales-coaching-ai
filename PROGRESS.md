@@ -464,3 +464,59 @@ ff27a63 docs: update PROGRESS.md with Session 8 git activity
 - [ ] Set up error tracking (Sentry)
 - [ ] Performance monitoring
 - [ ] Use history context in intent classification for better follow-up handling
+
+---
+
+## 2026-01-20 — Session 9
+
+### Summary
+Fixed CORS issues and consolidated Vercel deployment to single project.
+
+### Completed
+- [x] Fixed Vercel deployment serving raw JS (added root `vercel.json`)
+- [x] Fixed CORS blocking frontend requests (trailing slash in env var)
+- [x] Added wildcard CORS support for `*.vercel.app` preview deployments
+- [x] Added trailing slash normalization for CORS origins
+- [x] Consolidated Vercel deployment from "client" project to "sales-coaching-ai"
+- [x] Removed deprecated `client/.vercel` directory
+- [x] Updated `client/.env.example` with actual Railway API URL
+
+### Files Changed
+- `vercel.json` — New: Root-level Vercel config for monorepo deployment
+- `src/app.ts` — CORS middleware with wildcard support
+- `src/config/index.ts` — Trailing slash normalization for origins
+- `.env.example` — Updated CORS documentation
+- `client/.env.example` — Updated with actual Railway URL
+- `client/.vercel/` — Removed (was linked to deprecated project)
+
+### CORS Fix Details
+**Problem:** Browser origin `https://client-navy-iota-49.vercel.app` didn't match env var `https://client-navy-iota-49.vercel.app/` (trailing slash)
+
+**Solution:** Added `.replace(/\/$/, '')` to strip trailing slashes when parsing `ALLOWED_ORIGINS`
+
+### Deployment Consolidation
+| Component | Old | New |
+|-----------|-----|-----|
+| Vercel Project | `client` | `sales-coaching-ai` |
+| Frontend URL | `client-*.vercel.app` | `sales-coaching-ai.vercel.app` |
+| Backend URL | — | `sales-coaching-api-production.up.railway.app` |
+
+### Production URLs
+- **Frontend:** https://sales-coaching-ai.vercel.app
+- **Backend:** https://sales-coaching-api-production.up.railway.app
+
+### Git Activity
+```
+54dc290 fix(deploy): add root vercel.json to build from client directory
+56d9044 fix(cors): support wildcard patterns for Vercel preview deployments
+63f0846 debug(cors): add detailed logging for CORS debugging
+41951a8 fix(cors): strip trailing slashes from allowed origins
+5d79599 chore: remove CORS debug logging
+```
+
+### Next Steps
+- [ ] Fix Talk Ratio NaN% bug in agent stats formatter
+- [ ] Manager Configuration Panel (Phase 6) for rubric customization
+- [ ] Add authentication
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
