@@ -30,6 +30,8 @@ router.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
+    version: '2.0.0-auth',
+    buildTime: '2026-01-20T22:00:00Z',
   });
 });
 
