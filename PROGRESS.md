@@ -182,48 +182,37 @@ const turns = transcript?.turns ?? [];
 ## 2026-01-20 — Session 5
 
 ### Summary
-Fixed transcript data not displaying in CallDetailsModal despite modal opening correctly.
+Fixed transcript data not displaying and modal scroll issues in CallDetailsModal.
 
 ### Completed
 - [x] Traced data flow from click → API → modal → TranscriptViewer
-- [x] Identified two root causes in backend controller
 - [x] Fixed field name mismatch (`duration` → `total_duration_formatted`)
-- [x] Fixed missing turns array (RPC function doesn't return turns)
-- [x] Improved fallback case to include metadata from call record
+- [x] Added `parseTranscriptText()` to convert `full_transcript` text into `CallTurn[]`
+- [x] Handled missing `call_turns` table by parsing from text
+- [x] Added detailed step-by-step logging in controller and service
+- [x] Fixed modal scroll with `min-h-0` on flex containers
+- [x] Committed and pushed all fixes
 
 ### Files Changed
-- `src/controllers/calls.controller.ts` — Fixed transcript endpoint response structure
+- `src/controllers/calls.controller.ts` — Fixed response structure, added detailed logging
+- `src/services/database/transcripts.service.ts` — Added `parseTranscriptText()` function
+- `client/src/components/CallDetails/CallDetailsModal.tsx` — Added `min-h-0` for scroll
+- `client/src/components/CallDetails/TranscriptViewer.tsx` — Added `min-h-0` for scroll
 
 ### Bug Details
-**Symptoms:** Modal opens but shows "No transcript available" or empty transcript
 
-**Root Cause 1: Field Name Mismatch**
-- Backend sent `duration: transcript.total_duration_formatted`
-- Frontend expected `total_duration_formatted` (per `CallTranscript` type)
+**Bug 1: Transcript Not Displaying**
+- Field name mismatch: backend sent `duration`, frontend expected `total_duration_formatted`
+- `call_turns` table doesn't exist in database
+- Solution: Parse `full_transcript` text into turn objects
 
-**Root Cause 2: Missing Turns Array**
-- PostgreSQL `get_call_transcript()` returns text fields (`full_transcript`, etc.) but NOT a `turns` array
-- Controller tried `transcript.turns` which was always `undefined`
-- Fixed by always fetching turns separately via `getCallTurns(callId)`
+**Bug 2: Modal Not Scrollable**
+- Nested flexbox containers need `min-h-0` to allow overflow
+- Added to modal content wrapper and transcript viewer
 
-**Fix Applied:**
-```typescript
-// Get transcript metadata from PostgreSQL function
-const transcriptMeta = await transcriptsService.getCallTranscript(callId);
-
-// Always fetch turns separately since the RPC function doesn't return them
-const turns = await transcriptsService.getCallTurns(callId);
-
-res.json({
-  success: true,
-  data: {
-    call_id: callId,
-    agent_name: transcriptMeta.agent_name,
-    call_date: transcriptMeta.call_date,
-    total_duration_formatted: transcriptMeta.total_duration_formatted,
-    turns: turns,
-  },
-});
+### Git Activity
+```
+8511b7a fix: parse transcript text into turns and fix modal scroll
 ```
 
 ### Next Steps
