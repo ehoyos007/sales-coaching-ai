@@ -902,6 +902,11 @@ Rubric Version: 1
 - `TASKS.md` — Updated with Session 13-15 completions
 - `PROGRESS.md` — Added Session 15 notes
 
+### Git Activity
+```
+057150d docs: add Session 15 (dynamic rubric verification) to PROGRESS.md
+```
+
 ### Next Steps
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
