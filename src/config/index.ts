@@ -10,6 +10,13 @@ function requireEnv(name: string): string {
   return value;
 }
 
+// Parse CORS origins with logging
+const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || 'http://localhost:5173';
+const parsedOrigins = rawAllowedOrigins.split(',').map(origin => origin.trim());
+
+console.log('[CONFIG] Raw ALLOWED_ORIGINS:', rawAllowedOrigins);
+console.log('[CONFIG] Parsed origins:', parsedOrigins);
+
 export const config = {
   server: {
     port: parseInt(process.env.PORT || '3000', 10),
@@ -30,9 +37,7 @@ export const config = {
   },
   cors: {
     // Support multiple origins via comma-separated list
-    allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
-      .split(',')
-      .map(origin => origin.trim()),
+    allowedOrigins: parsedOrigins,
   },
 } as const;
 
