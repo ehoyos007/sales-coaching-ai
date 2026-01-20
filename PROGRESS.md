@@ -442,11 +442,23 @@ Frontend                          Backend                         Database
 ### Git Activity
 ```
 b0958d4 feat: add persistent conversation history
+ff27a63 docs: update PROGRESS.md with Session 8 git activity
 ```
 
-18 files changed, 863 insertions(+), 21 deletions(-)
+### Deployment & Troubleshooting
+- Ran Supabase migration for chat tables
+- Deployed backend to Railway
+- Deployed frontend to Vercel with `VITE_API_URL` env var
+- Fixed Vercel SSO protection blocking public access
+- Fixed stale Vercel alias pointing to old deployment
+- Verified end-to-end: chat, history persistence, New Chat button all working
+
+### Production URLs
+- Frontend: https://sales-coaching-ai.vercel.app
+- Backend: https://sales-coaching-api-production.up.railway.app
 
 ### Next Steps
+- [ ] Fix Talk Ratio NaN% bug in agent stats formatter
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
