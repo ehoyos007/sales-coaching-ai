@@ -518,6 +518,19 @@ cc3408f chore: consolidate Vercel deployment to sales-coaching-ai project
 ### Cleanup
 - Deleted deprecated Vercel project "client" via CLI (`vercel project rm client`)
 
+### Post-Deployment Fix
+**Issue:** Chat failing with "Unexpected end of JSON input" and 405 errors
+
+**Cause:** `VITE_API_URL` environment variable was not set on the new Vercel project, causing frontend to hit `/api/v1` on Vercel (returning HTML) instead of Railway backend
+
+**Fix:** Added environment variable via CLI:
+```bash
+vercel env add VITE_API_URL production
+# Value: https://sales-coaching-api-production.up.railway.app/api/v1
+```
+
+Redeployed with `vercel --prod` to embed the env var at build time.
+
 ### Next Steps
 - [ ] Fix Talk Ratio NaN% bug in agent stats formatter
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
