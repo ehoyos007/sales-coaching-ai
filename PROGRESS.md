@@ -176,3 +176,58 @@ const turns = transcript?.turns ?? [];
 - [ ] Fix team summary response formatting
 - [ ] Add session/conversation history support
 - [ ] Deploy to production
+
+---
+
+## 2026-01-20 — Session 5
+
+### Summary
+Fixed transcript data not displaying in CallDetailsModal despite modal opening correctly.
+
+### Completed
+- [x] Traced data flow from click → API → modal → TranscriptViewer
+- [x] Identified two root causes in backend controller
+- [x] Fixed field name mismatch (`duration` → `total_duration_formatted`)
+- [x] Fixed missing turns array (RPC function doesn't return turns)
+- [x] Improved fallback case to include metadata from call record
+
+### Files Changed
+- `src/controllers/calls.controller.ts` — Fixed transcript endpoint response structure
+
+### Bug Details
+**Symptoms:** Modal opens but shows "No transcript available" or empty transcript
+
+**Root Cause 1: Field Name Mismatch**
+- Backend sent `duration: transcript.total_duration_formatted`
+- Frontend expected `total_duration_formatted` (per `CallTranscript` type)
+
+**Root Cause 2: Missing Turns Array**
+- PostgreSQL `get_call_transcript()` returns text fields (`full_transcript`, etc.) but NOT a `turns` array
+- Controller tried `transcript.turns` which was always `undefined`
+- Fixed by always fetching turns separately via `getCallTurns(callId)`
+
+**Fix Applied:**
+```typescript
+// Get transcript metadata from PostgreSQL function
+const transcriptMeta = await transcriptsService.getCallTranscript(callId);
+
+// Always fetch turns separately since the RPC function doesn't return them
+const turns = await transcriptsService.getCallTurns(callId);
+
+res.json({
+  success: true,
+  data: {
+    call_id: callId,
+    agent_name: transcriptMeta.agent_name,
+    call_date: transcriptMeta.call_date,
+    total_duration_formatted: transcriptMeta.total_duration_formatted,
+    turns: turns,
+  },
+});
+```
+
+### Next Steps
+- [ ] Implement coaching handler in backend
+- [ ] Fix team summary response formatting
+- [ ] Add session/conversation history support
+- [ ] Deploy to production
