@@ -532,6 +532,51 @@ vercel env add VITE_API_URL production
 Redeployed with `vercel --prod` to embed the env var at build time.
 
 ### Next Steps
+- [x] Fix scrolling in Call Detail popup
+
+---
+
+## 2026-01-20 — Session 10
+
+### Summary
+Fixed scrolling issue in Call Detail popup where long transcripts couldn't be scrolled.
+
+### Completed
+- [x] Diagnosed flex height chain breaking between content wrapper and TranscriptViewer
+- [x] Identified root cause: `h-full` on TranscriptViewer couldn't resolve because parent only had `flex-1` (no explicit height)
+- [x] Fixed by making content wrapper a flex container and using `flex-1` instead of `h-full`
+- [x] Verified scrolling works for long transcripts
+- [x] Committed and pushed fix
+
+### Files Changed
+- `client/src/components/CallDetails/CallDetailsModal.tsx` — Added `flex flex-col` to content wrapper
+- `client/src/components/CallDetails/TranscriptViewer.tsx` — Changed root from `h-full` to `flex-1`
+
+### Bug Details
+**Problem:** Transcript content in Call Detail popup couldn't scroll when longer than visible area.
+
+**Root Cause:** The flex height chain was broken:
+1. Content wrapper had `flex-1 min-h-0` but wasn't a flex container
+2. TranscriptViewer used `h-full` which requires parent to have explicit CSS `height`
+3. `flex-1` doesn't provide an explicit height for `h-full` to reference
+
+**Fix:**
+```diff
+// CallDetailsModal.tsx line 178
+- <div className="flex-1 min-h-0 overflow-hidden">
++ <div className="flex-1 min-h-0 flex flex-col">
+
+// TranscriptViewer.tsx line 108
+- <div className="flex flex-col h-full min-h-0">
++ <div className="flex flex-col flex-1 min-h-0">
+```
+
+### Git Activity
+```
+fd5b7f9 fix(ui): enable scrolling in Call Detail transcript popup
+```
+
+### Next Steps
 - [ ] Fix Talk Ratio NaN% bug in agent stats formatter
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Add authentication
