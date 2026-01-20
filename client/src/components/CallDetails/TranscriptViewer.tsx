@@ -105,7 +105,7 @@ export const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
   }, [matchingTurnIds]);
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-slate-200 space-y-3">
         <div className="flex items-center justify-between">
