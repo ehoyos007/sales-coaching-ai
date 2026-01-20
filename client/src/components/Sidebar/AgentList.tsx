@@ -35,7 +35,10 @@ export const AgentList: React.FC<AgentListProps> = ({
     );
   }
 
-  if (agents.length === 0) {
+  // Ensure agents is an array
+  const agentsList = Array.isArray(agents) ? agents : [];
+
+  if (agentsList.length === 0) {
     return (
       <div className="px-3 py-8 text-center">
         <p className="text-sm text-slate-500">No agents found</p>
@@ -44,7 +47,7 @@ export const AgentList: React.FC<AgentListProps> = ({
   }
 
   // Group agents by department
-  const agentsByDepartment = agents.reduce(
+  const agentsByDepartment = agentsList.reduce(
     (acc, agent) => {
       const dept = agent.department || 'Other';
       if (!acc[dept]) {

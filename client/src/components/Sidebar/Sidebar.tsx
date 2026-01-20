@@ -108,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Agents ({agents.length})
+            Agents ({Array.isArray(agents) ? agents.length : 0})
           </button>
         </div>
 

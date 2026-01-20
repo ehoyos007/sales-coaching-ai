@@ -21,7 +21,9 @@ export function useAgents(): UseAgentsReturn {
     try {
       const response = await getAgents();
       if (response.success && response.data) {
-        setAgents(response.data);
+        // API returns { agents: [...], count: N }, extract the array
+        const agentsData = Array.isArray(response.data) ? response.data : response.data.agents;
+        setAgents(agentsData || []);
       } else {
         throw new Error(response.error || 'Failed to fetch agents');
       }
