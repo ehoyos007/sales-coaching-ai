@@ -14,13 +14,29 @@ export function createApp(): Express {
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
 
+      // Check exact match first
       if (config.cors.allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Check wildcard patterns (e.g., *.vercel.app)
+      const isAllowed = config.cors.allowedOrigins.some(allowed => {
+        if (allowed.startsWith('*.')) {
+          const domain = allowed.slice(2); // Remove "*."
+          return origin.endsWith(domain);
+        }
+        return false;
+      });
+
+      if (isAllowed) {
         return callback(null, true);
       }
 
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   }));
   app.use(express.json());
   app.use(requestLogger);
