@@ -1,4 +1,5 @@
 import React from 'react';
+import { UserMenu } from '../UserMenu';
 
 interface ChatHeaderProps {
   onToggleSidebar: () => void;
@@ -118,6 +119,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </svg>
           <span className="hidden sm:inline">Clear</span>
         </button>
+
+        {/* User Menu */}
+        <div className="ml-2 pl-2 border-l border-slate-200">
+          <UserMenu />
+        </div>
       </div>
     </header>
   );

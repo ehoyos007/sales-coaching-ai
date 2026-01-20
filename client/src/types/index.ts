@@ -14,6 +14,31 @@ export interface AgentWithStats extends Agent {
   total_calls?: number;
 }
 
+// User and Team types for Admin Panel
+export type UserRole = 'agent' | 'manager' | 'admin';
+
+export interface Team {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  member_count?: number;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string | null;
+  role: UserRole;
+  team_id: string | null;
+  team?: Team;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Call types
 export interface CallMetadata {
   call_id: string;
@@ -335,3 +360,12 @@ export function validateCategoryWeights(categories: { weight: number; is_enabled
         : `${Math.abs(remaining)}% over the limit`,
   };
 }
+
+// Auth types - re-export from auth.types.ts
+export type {
+  AuthUser,
+  AuthSession,
+  SignInResponse,
+  SignUpResponse,
+  MeResponse,
+} from './auth.types';

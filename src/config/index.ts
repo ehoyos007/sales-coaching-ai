@@ -38,6 +38,11 @@ export const config = {
     // Support multiple origins via comma-separated list
     allowedOrigins: parsedOrigins,
   },
+  // Shorthand exports for auth service
+  supabaseUrl: requireEnv('SUPABASE_URL'),
+  supabaseServiceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
 } as const;
 
 export type Config = typeof config;
+
+export default config;

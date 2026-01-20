@@ -18,6 +18,22 @@ export interface IntentClassification {
   confidence: number;
 }
 
+export interface DataAccessScope {
+  agentUserIds: string[];
+  isFloorWide: boolean;
+  isTeamScope: boolean;
+  teamId: string | null;
+  teamName: string | null;
+}
+
+export interface UserContext {
+  userId: string;
+  email: string;
+  role: 'admin' | 'manager' | 'agent';
+  teamId: string | null;
+  agentUserId: string | null;
+}
+
 export interface HandlerParams {
   agentId?: string;
   agentName?: string;
@@ -28,6 +44,9 @@ export interface HandlerParams {
   startDate?: string;
   endDate?: string;
   limit?: number;
+  // Auth context
+  dataScope?: DataAccessScope;
+  userContext?: UserContext;
 }
 
 export interface HandlerResult {

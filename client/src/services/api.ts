@@ -14,10 +14,31 @@ import type {
   RubricVersionSummary,
   CreateRubricConfigInput,
   UpdateRubricConfigInput,
+  SignInResponse,
+  SignUpResponse,
+  MeResponse,
+  UserProfile,
+  UserRole,
+  Team,
 } from '../types';
 
 // Use environment variable for API URL, fallback to relative path for dev proxy
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
+const TOKEN_KEY = 'auth_token';
+
+// Token management functions
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 class ApiError extends Error {
   constructor(
@@ -36,12 +57,20 @@ async function request<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  // Auto-attach Authorization header if token exists
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const config: RequestInit = {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   };
 
   try {
@@ -49,6 +78,15 @@ async function request<T>(
     const data = await response.json();
 
     if (!response.ok) {
+      // Handle 401 responses by clearing token and redirecting to login
+      if (response.status === 401) {
+        clearToken();
+        // Only redirect if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+      }
+
       throw new ApiError(
         data.error || `HTTP error ${response.status}`,
         response.status,
@@ -66,6 +104,50 @@ async function request<T>(
       0
     );
   }
+}
+
+// Auth API
+export async function signUp(
+  email: string,
+  password: string,
+  fullName?: string
+): Promise<SignUpResponse> {
+  return request<SignUpResponse>('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, full_name: fullName }),
+  });
+}
+
+export async function signIn(
+  email: string,
+  password: string
+): Promise<SignInResponse> {
+  const response = await request<SignInResponse>('/auth/signin', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+
+  // Store token on successful sign in
+  if (response.success && response.data?.session.access_token) {
+    setToken(response.data.session.access_token);
+  }
+
+  return response;
+}
+
+export async function signOut(): Promise<ApiResponse<{ message: string }>> {
+  const response = await request<ApiResponse<{ message: string }>>('/auth/signout', {
+    method: 'POST',
+  });
+
+  // Clear token on sign out
+  clearToken();
+
+  return response;
+}
+
+export async function getMe(): Promise<MeResponse> {
+  return request<MeResponse>('/auth/me');
 }
 
 // Chat API
@@ -220,6 +302,46 @@ export async function activateRubric(
 export async function deleteRubric(id: string): Promise<ApiResponse<{ message: string }>> {
   return request<ApiResponse<{ message: string }>>(`/rubric/${id}`, {
     method: 'DELETE',
+  });
+}
+
+// Admin API - User Management
+export async function getAdminUsers(): Promise<ApiResponse<{ users: UserProfile[]; count: number }>> {
+  return request<ApiResponse<{ users: UserProfile[]; count: number }>>('/admin/users');
+}
+
+export async function updateUserRole(
+  userId: string,
+  role: UserRole
+): Promise<ApiResponse<{ profile: UserProfile }>> {
+  return request<ApiResponse<{ profile: UserProfile }>>(`/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: JSON.stringify({ role }),
+  });
+}
+
+export async function updateUserTeam(
+  userId: string,
+  teamId: string | null
+): Promise<ApiResponse<{ profile: UserProfile }>> {
+  return request<ApiResponse<{ profile: UserProfile }>>(`/admin/users/${userId}/team`, {
+    method: 'PUT',
+    body: JSON.stringify({ team_id: teamId }),
+  });
+}
+
+// Admin API - Team Management
+export async function getAdminTeams(): Promise<ApiResponse<{ teams: Team[]; count: number }>> {
+  return request<ApiResponse<{ teams: Team[]; count: number }>>('/admin/teams');
+}
+
+export async function createTeam(
+  name: string,
+  description?: string
+): Promise<ApiResponse<{ team: Team }>> {
+  return request<ApiResponse<{ team: Team }>>('/admin/teams', {
+    method: 'POST',
+    body: JSON.stringify({ name, description }),
   });
 }
 

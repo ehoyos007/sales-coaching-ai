@@ -1,10 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { ChatContainer } from './components/Chat/ChatContainer';
 import { ChatHeader } from './components/Chat/ChatHeader';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { CallDetailsModal } from './components/CallDetails/CallDetailsModal';
 import { RubricSettings } from './pages/Settings';
+import { LoginPage } from './pages/Login';
+import { AdminPage } from './pages/Admin';
 import { useChat } from './hooks/useChat';
 import { useAgents } from './hooks/useAgents';
 import { useCalls } from './hooks/useCalls';
@@ -152,10 +156,42 @@ const ChatPage: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/" element={<ChatPage />} />
-      <Route path="/settings/rubric" element={<RubricSettings />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        {/* Public route - Login page */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected route - Main chat page */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected route with role restriction - Rubric settings (admin/manager only) */}
+        <Route
+          path="/settings/rubric"
+          element={
+            <ProtectedRoute requiredRoles={['admin', 'manager']}>
+              <RubricSettings />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected route with role restriction - Admin panel (admin only) */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRoles={['admin']}>
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </AuthProvider>
   );
 };
 

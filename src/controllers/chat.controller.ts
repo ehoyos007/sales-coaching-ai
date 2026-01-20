@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { chatService } from '../services/chat/chat.service.js';
 import { sessionsService } from '../services/database/sessions.service.js';
-import { ChatRequest } from '../types/index.js';
+import { ChatRequest, UserContext, DataAccessScope } from '../types/index.js';
 
 export async function handleChat(req: Request, res: Response): Promise<void> {
   try {
@@ -15,15 +15,31 @@ export async function handleChat(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Build user context from auth middleware
+    const userContext: UserContext | undefined = req.profile
+      ? {
+          userId: req.user!.id,
+          email: req.user!.email,
+          role: req.profile.role,
+          teamId: req.profile.team_id,
+          agentUserId: req.profile.agent_user_id,
+        }
+      : undefined;
+
+    // Get data scope from auth middleware
+    const dataScope: DataAccessScope | undefined = req.dataScope;
+
     const result = await chatService.processMessage(
       body.message,
       body.context,
-      body.session_id
+      body.session_id,
+      userContext,
+      dataScope
     );
 
     res.json(result);
   } catch (error) {
-    console.error('Chat controller error:', error);
+    console.error('[chat.controller] Chat error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
@@ -68,7 +84,7 @@ export async function getHistory(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('Get history error:', error);
+    console.error('[chat.controller] Get history error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({
       success: false,
