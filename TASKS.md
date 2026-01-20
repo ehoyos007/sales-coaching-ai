@@ -15,15 +15,10 @@ Preparing for deployment and adding polish features
 
 ### High Priority
 
-- [ ] **Add Session/Conversation History**
-  - Description: Persist chat history so users can have contextual follow-up questions
-  - Approach: Store in Supabase or implement in-memory session store
-  - Dependencies: May need new database table
-
-- [ ] **Deploy to Production**
-  - Description: Set up hosting and deploy the application
-  - Platform: Vercel (frontend) + Railway/Render (backend)
-  - Checklist: See Deployment Checklist below
+- [ ] **Run database migration for conversation history**
+  - Description: Execute the migration in Supabase SQL Editor
+  - File: `supabase/migrations/20260120000000_add_chat_history.sql`
+  - Status: Code complete, awaiting migration execution
 
 ### Medium Priority
 
@@ -66,9 +61,19 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 8 (2026-01-20)
+- [x] Added session/conversation history support
+- [x] Created database migration for chat_sessions and chat_messages tables
+- [x] Added backend types and sessions service
+- [x] Updated chat service to save messages to database
+- [x] Added history API endpoint
+- [x] Updated frontend to persist sessionId and load history
+- [x] Added "New Chat" button to start fresh conversations
+
 ### Session 7 (2026-01-20)
 - [x] Updated TASKS.md to reflect current project status
 - [x] Fixed team summary response formatting (aligned formatter with actual RPC response)
+- [x] Deployed to production (Vercel + Railway)
 
 ### Session 6 (2026-01-20)
 - [x] Designed and implemented coaching rubric with 6 scoring categories
@@ -138,8 +143,8 @@ Preparing for deployment and adding polish features
 
 ## 🚀 Deployment Checklist
 
-- [ ] Set up production environment variables
-- [ ] Configure deployment platform (Vercel/Railway)
+- [x] Set up production environment variables
+- [x] Configure deployment platform (Vercel/Railway)
 - [ ] Set up CI/CD pipeline
 - [ ] Add health check endpoint monitoring
 - [ ] Configure error tracking (Sentry)

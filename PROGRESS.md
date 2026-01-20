@@ -355,8 +355,100 @@ ed4ab9f chore(deploy): add Railway and Vercel deployment configuration
 ```
 
 ### Next Steps
-- [ ] Add session/conversation history support
+- [x] Add session/conversation history support
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
 - [ ] Performance monitoring
+
+---
+
+## 2026-01-20 — Session 8
+
+### Summary
+Implemented persistent conversation history so users can have contextual follow-up questions across page reloads.
+
+### Completed
+- [x] Created Supabase migration for `chat_sessions` and `chat_messages` tables
+- [x] Added backend types for session management (`session.types.ts`)
+- [x] Created sessions service with CRUD operations
+- [x] Added token estimation utility for history budget management
+- [x] Added `chatWithHistory()` method to Claude service (multi-turn support)
+- [x] Updated chat service to save user/assistant messages to database
+- [x] Added `/chat/history/:sessionId` API endpoint
+- [x] Updated frontend `useChat` hook to persist sessionId and load history
+- [x] Added "New Chat" button to start fresh conversations
+- [x] Added loading indicator when restoring conversation history
+- [x] Verified builds pass for both frontend and backend
+
+### Files Changed
+
+**Backend - New Files:**
+- `supabase/migrations/20260120000000_add_chat_history.sql` — Database migration
+- `src/types/session.types.ts` — Types for sessions and messages
+- `src/services/database/sessions.service.ts` — Session CRUD operations
+- `src/utils/tokens.ts` — Token estimation utility
+
+**Backend - Modified Files:**
+- `src/types/index.ts` — Export session types
+- `src/services/ai/claude.service.ts` — Added `chatWithHistory()` method
+- `src/services/chat/chat.service.ts` — Save messages to history
+- `src/controllers/chat.controller.ts` — Added `getHistory()` endpoint
+- `src/routes/chat.routes.ts` — Added GET `/chat/history/:sessionId` route
+
+**Frontend - Modified Files:**
+- `client/src/types/index.ts` — Added `ChatMessageRecord`, `ChatSessionRecord`, `ChatHistoryResponse`
+- `client/src/services/api.ts` — Added `getChatHistory()` function
+- `client/src/hooks/useChat.ts` — Persist sessionId, load history, `startNewChat()`
+- `client/src/components/Chat/ChatHeader.tsx` — Added "New Chat" button
+- `client/src/components/Chat/ChatContainer.tsx` — Added history loading indicator
+- `client/src/App.tsx` — Wire up new chat functionality
+
+### Architecture
+
+```
+Frontend                          Backend                         Database
+┌─────────────┐                  ┌─────────────┐                 ┌──────────────┐
+│ useChat     │ ──POST /chat──▶  │ chat.service│ ──history──▶   │ chat_sessions│
+│ (sessionId  │                  │   ↓         │                 │ chat_messages│
+│  in storage)│ ◀─response───── │ claude (with│ ◀─save──────── └──────────────┘
+└─────────────┘                  │  history)   │
+                                 └─────────────┘
+```
+
+### Key Features
+- **Session persistence**: sessionId stored in localStorage, survives page reloads
+- **Message storage**: All user/assistant messages saved with intent and data
+- **Token budgeting**: Max 6,000 tokens for history, 50 messages max
+- **New Chat**: Clear button starts fresh session with new ID
+- **Loading state**: Shows spinner while restoring previous conversation
+
+### Database Schema
+
+**chat_sessions:**
+- `session_id` TEXT UNIQUE (frontend-generated)
+- `context` JSONB (agent_user_id, call_id, department)
+- `message_count` INTEGER
+- `last_activity_at` TIMESTAMPTZ
+
+**chat_messages:**
+- `session_id` TEXT FK → chat_sessions
+- `role` TEXT ('user' | 'assistant')
+- `content` TEXT
+- `intent` TEXT
+- `data` JSONB
+- `token_count` INTEGER
+
+### Deployment Note
+The migration must be run in Supabase before deploying:
+```sql
+-- Run in Supabase SQL Editor
+-- Copy contents of supabase/migrations/20260120000000_add_chat_history.sql
+```
+
+### Next Steps
+- [ ] Manager Configuration Panel (Phase 6) for rubric customization
+- [ ] Add authentication
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
+- [ ] Use history context in intent classification for better follow-up handling

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../../config/index.js';
+import { ClaudeMessage } from '../../types/index.js';
 
 let anthropicClient: Anthropic | null = null;
 
@@ -106,8 +107,52 @@ export async function generateResponse(
   return response.content;
 }
 
+/**
+ * Send a message to Claude with conversation history for multi-turn context
+ */
+export async function chatWithHistory(
+  systemPrompt: string,
+  history: ClaudeMessage[],
+  currentMessage: string,
+  options: {
+    maxTokens?: number;
+    temperature?: number;
+  } = {}
+): Promise<ClaudeResponse> {
+  const client = getClient();
+
+  const { maxTokens = 2048, temperature = 0.7 } = options;
+
+  // Build messages array with history + current message
+  const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+    ...history,
+    { role: 'user', content: currentMessage },
+  ];
+
+  const response = await client.messages.create({
+    model: config.anthropic.model,
+    max_tokens: maxTokens,
+    temperature,
+    system: systemPrompt,
+    messages,
+  });
+
+  // Extract text content from response
+  const textContent = response.content.find((block) => block.type === 'text');
+  const content = textContent?.type === 'text' ? textContent.text : '';
+
+  return {
+    content,
+    usage: {
+      input_tokens: response.usage.input_tokens,
+      output_tokens: response.usage.output_tokens,
+    },
+  };
+}
+
 export const claudeService = {
   chat,
   chatJSON,
   generateResponse,
+  chatWithHistory,
 };

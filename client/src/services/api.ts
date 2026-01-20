@@ -9,6 +9,7 @@ import type {
   TeamSummary,
   SearchResult,
   CallSummary,
+  ChatHistoryResponse,
 } from '../types';
 
 // Use environment variable for API URL, fallback to relative path for dev proxy
@@ -79,6 +80,12 @@ export async function sendChatMessage(
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export async function getChatHistory(
+  sessionId: string
+): Promise<ApiResponse<ChatHistoryResponse>> {
+  return request<ApiResponse<ChatHistoryResponse>>(`/chat/history/${sessionId}`);
 }
 
 // Agents API

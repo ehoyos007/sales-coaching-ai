@@ -4,12 +4,14 @@ interface ChatHeaderProps {
   onToggleSidebar: () => void;
   isSidebarOpen: boolean;
   onClearChat: () => void;
+  onNewChat?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onToggleSidebar,
   isSidebarOpen,
   onClearChat,
+  onNewChat,
 }) => {
   return (
     <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white">
@@ -74,6 +76,28 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        {onNewChat && (
+          <button
+            onClick={onNewChat}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-smooth focus-ring"
+            aria-label="Start new chat"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span className="hidden sm:inline">New Chat</span>
+          </button>
+        )}
         <button
           onClick={onClearChat}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-smooth focus-ring"

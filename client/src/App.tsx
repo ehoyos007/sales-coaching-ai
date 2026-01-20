@@ -13,9 +13,11 @@ const App: React.FC = () => {
   const {
     messages,
     isLoading,
+    isLoadingHistory,
     sendMessage,
     setContext,
     clearMessages,
+    startNewChat,
   } = useChat();
 
   // Agents state
@@ -91,6 +93,12 @@ const App: React.FC = () => {
     setContext({});
   }, [clearMessages, setContext]);
 
+  // Handle new chat (starts a fresh session)
+  const handleNewChat = useCallback(() => {
+    startNewChat();
+    setSelectedAgentId(undefined);
+  }, [startNewChat]);
+
   return (
     <div className="flex h-screen w-full bg-slate-50">
       {/* Sidebar */}
@@ -112,6 +120,7 @@ const App: React.FC = () => {
           onToggleSidebar={toggleSidebar}
           isSidebarOpen={isSidebarOpen}
           onClearChat={handleClearChat}
+          onNewChat={handleNewChat}
         />
 
         {/* Chat container */}
@@ -119,6 +128,7 @@ const App: React.FC = () => {
           <ChatContainer
             messages={messages}
             isLoading={isLoading}
+            isLoadingHistory={isLoadingHistory}
             onSendMessage={sendMessage}
             onCallClick={handleCallClick}
           />

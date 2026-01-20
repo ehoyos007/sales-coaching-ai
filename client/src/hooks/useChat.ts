@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { sendChatMessage, ApiError } from '../services/api';
-import type { Message, ChatContext, ChatResponseData, Intent } from '../types';
+import { sendChatMessage, getChatHistory, ApiError } from '../services/api';
+import type { Message, ChatContext, ChatResponseData, Intent, ChatMessageRecord } from '../types';
+
+const SESSION_STORAGE_KEY = 'sales-coaching-session-id';
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -10,9 +12,31 @@ function generateSessionId(): string {
   return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+function getOrCreateSessionId(): string {
+  const stored = localStorage.getItem(SESSION_STORAGE_KEY);
+  if (stored) {
+    return stored;
+  }
+  const newId = generateSessionId();
+  localStorage.setItem(SESSION_STORAGE_KEY, newId);
+  return newId;
+}
+
+function convertRecordToMessage(record: ChatMessageRecord): Message {
+  return {
+    id: record.id,
+    role: record.role,
+    content: record.content,
+    timestamp: new Date(record.created_at),
+    data: record.data as ChatResponseData | undefined,
+    intent: record.intent as Intent | undefined,
+  };
+}
+
 interface UseChatReturn {
   messages: Message[];
   isLoading: boolean;
+  isLoadingHistory: boolean;
   error: string | null;
   sessionId: string;
   context: ChatContext;
@@ -20,16 +44,52 @@ interface UseChatReturn {
   setContext: (context: ChatContext) => void;
   clearMessages: () => void;
   clearError: () => void;
+  startNewChat: () => void;
 }
 
 export function useChat(): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sessionId] = useState<string>(() => generateSessionId());
+  const [sessionId, setSessionId] = useState<string>(() => getOrCreateSessionId());
   const [context, setContext] = useState<ChatContext>({});
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const historyLoadedRef = useRef<Set<string>>(new Set());
+
+  // Load chat history when sessionId changes
+  useEffect(() => {
+    const loadHistory = async () => {
+      // Skip if already loaded for this session
+      if (historyLoadedRef.current.has(sessionId)) {
+        return;
+      }
+
+      setIsLoadingHistory(true);
+      try {
+        const response = await getChatHistory(sessionId);
+        if (response.success && response.data?.messages.length) {
+          const loadedMessages = response.data.messages.map(convertRecordToMessage);
+          setMessages(loadedMessages);
+
+          // Restore context if available
+          if (response.data.session?.context) {
+            setContext(response.data.session.context);
+          }
+        }
+        historyLoadedRef.current.add(sessionId);
+      } catch (err) {
+        console.error('Failed to load chat history:', err);
+        // Non-fatal: continue without history
+        historyLoadedRef.current.add(sessionId);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+  }, [sessionId]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -122,9 +182,22 @@ export function useChat(): UseChatReturn {
     setContext(newContext);
   }, []);
 
+  const startNewChat = useCallback(() => {
+    // Generate new session ID and update localStorage
+    const newId = generateSessionId();
+    localStorage.setItem(SESSION_STORAGE_KEY, newId);
+    setSessionId(newId);
+
+    // Clear current messages and context
+    setMessages([]);
+    setError(null);
+    setContext({});
+  }, []);
+
   return {
     messages,
     isLoading,
+    isLoadingHistory,
     error,
     sessionId,
     context,
@@ -132,6 +205,7 @@ export function useChat(): UseChatReturn {
     setContext: updateContext,
     clearMessages,
     clearError,
+    startNewChat,
   };
 }
 

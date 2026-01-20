@@ -172,3 +172,31 @@ export interface ChatState {
   sessionId: string;
   context: ChatContext;
 }
+
+// Chat history types for API responses
+export interface ChatMessageRecord {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  intent: string | null;
+  data: Record<string, unknown> | null;
+  token_count: number | null;
+  created_at: string;
+}
+
+export interface ChatSessionRecord {
+  id: string;
+  session_id: string;
+  context: ChatContext;
+  created_at: string;
+  updated_at: string;
+  last_activity_at: string;
+  message_count: number;
+  is_active: boolean;
+}
+
+export interface ChatHistoryResponse {
+  session: ChatSessionRecord | null;
+  messages: ChatMessageRecord[];
+}
