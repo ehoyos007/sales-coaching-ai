@@ -49,6 +49,17 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 16 (2026-01-20)
+- [x] Implemented full authentication system with RBAC
+  - Auth service with Supabase Auth integration
+  - Middleware for authentication, authorization, data scoping
+  - Domain restriction (@firsthealthenroll.org only)
+  - Role-based access: Admin, Manager, Agent
+  - Data scoping: Agent=own calls, Manager=team calls, Admin=all
+  - Frontend: Login page, protected routes, user menu, admin panel
+  - Fixed RLS issues with service role key
+  - Fixed CORS for multiple dev ports
+
 ### Session 15 (2026-01-20)
 - [x] Tested coaching analysis with dynamic rubric end-to-end
 - [x] Verified rubric config ID and version returned in coaching response
@@ -158,11 +169,11 @@ Preparing for deployment and adding polish features
 - [ ] Add health check endpoint monitoring
 - [ ] Configure error tracking (Sentry)
 - [ ] Set up logging (Logtail/Datadog)
-- [ ] Add authentication
+- [x] Add authentication
 - [ ] Security review (CORS, rate limiting)
 - [ ] Performance testing
 - [ ] Update README with deployment instructions
 
 ---
 
-**Last Updated:** 2026-01-20 (Session 15)
+**Last Updated:** 2026-01-20 (Session 16)
