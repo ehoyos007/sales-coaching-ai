@@ -1107,7 +1107,84 @@ c281a1c chore: add version identifier to health endpoint for deployment verifica
 When debugging production issues, always verify that deployments are actually happening. Check the deployment platform's dashboard for recent deployments before diving into code changes.
 
 ### Next Steps
-- [ ] Set up error tracking (Sentry)
+- [x] Set up error tracking (Sentry)
 - [ ] Performance monitoring
 - [ ] Add password reset flow
 - [ ] Add email verification for new signups
+
+---
+
+## 2026-01-20 — Session 19
+
+### Summary
+Implemented Sentry error tracking for both backend and frontend with user context, error boundaries, and API error capture.
+
+### Completed
+- [x] Installed @sentry/node for backend
+- [x] Installed @sentry/react for frontend
+- [x] Created backend Sentry initialization module (`src/lib/sentry.ts`)
+- [x] Updated error middleware to capture 5xx errors with request context
+- [x] Created frontend Sentry initialization module (`client/src/lib/sentry.ts`)
+- [x] Added React ErrorBoundary with user-friendly fallback UI
+- [x] Updated API service to capture server and network errors
+- [x] Updated AuthContext to set/clear Sentry user context on login/logout
+- [x] Added environment variable support for both backend and frontend
+- [x] Verified both builds pass
+- [x] Committed and pushed changes
+
+### Files Created
+- `src/lib/sentry.ts` — Backend Sentry initialization
+- `client/src/lib/sentry.ts` — Frontend Sentry initialization with helpers
+
+### Files Modified
+- `package.json` — Added @sentry/node dependency
+- `client/package.json` — Added @sentry/react dependency
+- `src/config/index.ts` — Added sentry config section
+- `src/index.ts` — Initialize Sentry on startup
+- `src/middleware/error.middleware.ts` — Capture 5xx errors to Sentry
+- `client/src/main.tsx` — Added ErrorBoundary wrapper
+- `client/src/services/api.ts` — Capture API errors to Sentry
+- `client/src/contexts/AuthContext.tsx` — Set/clear Sentry user context
+- `client/src/vite-env.d.ts` — Added VITE_SENTRY_DSN type
+- `.env.example` — Added SENTRY_DSN
+- `client/.env.example` — Added VITE_SENTRY_DSN
+
+### Features
+
+**Backend Error Tracking:**
+- Captures all 5xx errors with request context (URL, method, body)
+- Adds user context (id, email) when authenticated
+- Filters out "Route not found" errors (expected 404s)
+- Configurable sample rate (10% in production, 100% in dev)
+
+**Frontend Error Tracking:**
+- ErrorBoundary catches React rendering errors
+- Shows user-friendly fallback UI with "Try again" button
+- Displays error details in development mode
+- API service captures 5xx and network errors
+- User context set on login, cleared on logout
+- Session replay enabled (10% normal, 100% on error)
+
+### Environment Variables
+
+| Variable | Location | Purpose |
+|----------|----------|---------|
+| `SENTRY_DSN` | Backend (.env) | Sentry project DSN for Node.js |
+| `VITE_SENTRY_DSN` | Frontend (.env) | Sentry project DSN for React |
+
+### Git Activity
+```
+e4bdefe feat: add Sentry error tracking for backend and frontend
+```
+
+### Next Steps to Activate
+1. Create Sentry project at https://sentry.io
+2. Add `SENTRY_DSN` to Railway environment variables
+3. Add `VITE_SENTRY_DSN` to Vercel environment variables
+4. Redeploy both services
+
+### Next Steps
+- [ ] Performance monitoring
+- [ ] Add password reset flow
+- [ ] Add email verification for new signups
+- [ ] Add source maps upload for better stack traces
