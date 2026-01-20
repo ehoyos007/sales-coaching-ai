@@ -10,6 +10,10 @@ import type {
   SearchResult,
   CallSummary,
   ChatHistoryResponse,
+  RubricConfigWithRelations,
+  RubricVersionSummary,
+  CreateRubricConfigInput,
+  UpdateRubricConfigInput,
 } from '../types';
 
 // Use environment variable for API URL, fallback to relative path for dev proxy
@@ -171,6 +175,52 @@ export async function getTeamSummary(params?: {
   const endpoint = `/team/summary${query ? `?${query}` : ''}`;
 
   return request<ApiResponse<TeamSummary>>(endpoint);
+}
+
+// Rubric API
+export async function getActiveRubric(): Promise<ApiResponse<RubricConfigWithRelations>> {
+  return request<ApiResponse<RubricConfigWithRelations>>('/rubric');
+}
+
+export async function getRubricVersions(): Promise<ApiResponse<{ versions: RubricVersionSummary[]; count: number }>> {
+  return request<ApiResponse<{ versions: RubricVersionSummary[]; count: number }>>('/rubric/versions');
+}
+
+export async function getRubricById(id: string): Promise<ApiResponse<RubricConfigWithRelations>> {
+  return request<ApiResponse<RubricConfigWithRelations>>(`/rubric/${id}`);
+}
+
+export async function createRubric(
+  input: CreateRubricConfigInput
+): Promise<ApiResponse<RubricConfigWithRelations>> {
+  return request<ApiResponse<RubricConfigWithRelations>>('/rubric', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateRubric(
+  id: string,
+  input: UpdateRubricConfigInput
+): Promise<ApiResponse<RubricConfigWithRelations>> {
+  return request<ApiResponse<RubricConfigWithRelations>>(`/rubric/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function activateRubric(
+  id: string
+): Promise<ApiResponse<RubricConfigWithRelations>> {
+  return request<ApiResponse<RubricConfigWithRelations>>(`/rubric/${id}/activate`, {
+    method: 'POST',
+  });
+}
+
+export async function deleteRubric(id: string): Promise<ApiResponse<{ message: string }>> {
+  return request<ApiResponse<{ message: string }>>(`/rubric/${id}`, {
+    method: 'DELETE',
+  });
 }
 
 export { ApiError };

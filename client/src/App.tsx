@@ -1,14 +1,16 @@
 import React, { useState, useCallback } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { ChatContainer } from './components/Chat/ChatContainer';
 import { ChatHeader } from './components/Chat/ChatHeader';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { CallDetailsModal } from './components/CallDetails/CallDetailsModal';
+import { RubricSettings } from './pages/Settings';
 import { useChat } from './hooks/useChat';
 import { useAgents } from './hooks/useAgents';
 import { useCalls } from './hooks/useCalls';
 import type { Agent } from './types';
 
-const App: React.FC = () => {
+const ChatPage: React.FC = () => {
   // Chat state
   const {
     messages,
@@ -145,6 +147,15 @@ const App: React.FC = () => {
         error={callError}
       />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<ChatPage />} />
+      <Route path="/settings/rubric" element={<RubricSettings />} />
+    </Routes>
   );
 };
 

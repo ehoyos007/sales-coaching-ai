@@ -200,3 +200,138 @@ export interface ChatHistoryResponse {
   session: ChatSessionRecord | null;
   messages: ChatMessageRecord[];
 }
+
+// Rubric types
+export type RedFlagSeverity = 'critical' | 'high' | 'medium';
+export type ThresholdType = 'boolean' | 'percentage';
+
+export interface RubricScoringCriteria {
+  id: string;
+  category_id: string;
+  score: number;
+  criteria_text: string;
+  created_at: string;
+}
+
+export interface ScoringCriteriaInput {
+  score: number;
+  criteria_text: string;
+}
+
+export interface RubricCategory {
+  id: string;
+  rubric_config_id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  weight: number;
+  sort_order: number;
+  is_enabled: boolean;
+  created_at: string;
+  scoring_criteria?: RubricScoringCriteria[];
+}
+
+export interface CategoryInput {
+  name: string;
+  slug: string;
+  description?: string;
+  weight: number;
+  sort_order: number;
+  is_enabled?: boolean;
+  scoring_criteria?: ScoringCriteriaInput[];
+}
+
+export interface RubricRedFlag {
+  id: string;
+  rubric_config_id: string;
+  flag_key: string;
+  display_name: string;
+  description: string;
+  severity: RedFlagSeverity;
+  threshold_type: ThresholdType | null;
+  threshold_value: number | null;
+  is_enabled: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface RedFlagInput {
+  flag_key: string;
+  display_name: string;
+  description: string;
+  severity: RedFlagSeverity;
+  threshold_type?: ThresholdType;
+  threshold_value?: number;
+  is_enabled?: boolean;
+  sort_order?: number;
+}
+
+export interface RubricConfig {
+  id: string;
+  name: string;
+  description: string | null;
+  version: number;
+  is_active: boolean;
+  is_draft: boolean;
+  created_at: string;
+  updated_at: string;
+  categories?: RubricCategory[];
+  red_flags?: RubricRedFlag[];
+}
+
+export interface RubricConfigWithRelations extends RubricConfig {
+  categories: (RubricCategory & {
+    scoring_criteria: RubricScoringCriteria[];
+  })[];
+  red_flags: RubricRedFlag[];
+}
+
+export interface RubricVersionSummary {
+  id: string;
+  name: string;
+  version: number;
+  is_active: boolean;
+  is_draft: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRubricConfigInput {
+  name: string;
+  description?: string;
+  is_draft?: boolean;
+  clone_from_id?: string;
+  categories?: CategoryInput[];
+  red_flags?: RedFlagInput[];
+}
+
+export interface UpdateRubricConfigInput {
+  name?: string;
+  description?: string;
+  categories?: CategoryInput[];
+  red_flags?: RedFlagInput[];
+}
+
+export interface WeightValidation {
+  isValid: boolean;
+  total: number;
+  remaining: number;
+  message?: string;
+}
+
+export function validateCategoryWeights(categories: { weight: number; is_enabled?: boolean }[]): WeightValidation {
+  const enabledCategories = categories.filter(c => c.is_enabled !== false);
+  const total = enabledCategories.reduce((sum, c) => sum + c.weight, 0);
+  const remaining = 100 - total;
+
+  return {
+    isValid: Math.abs(remaining) < 0.01,
+    total: Math.round(total * 100) / 100,
+    remaining: Math.round(remaining * 100) / 100,
+    message: remaining === 0
+      ? undefined
+      : remaining > 0
+        ? `${remaining}% remaining to allocate`
+        : `${Math.abs(remaining)}% over the limit`,
+  };
+}

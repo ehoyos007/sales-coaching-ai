@@ -678,7 +678,129 @@ edce49b feat(chat): add objection analysis handler for deep-dive objection revie
 - Backend: https://sales-coaching-api-production.up.railway.app
 
 ### Next Steps
-- [ ] Manager Configuration Panel (Phase 6) for rubric customization
+- [x] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
 - [ ] Performance monitoring
+
+---
+
+## 2026-01-20 — Session 13
+
+### Summary
+Implemented the Manager Configuration Panel for customizable coaching rubric with full CRUD operations, versioning, and dynamic prompt generation.
+
+### Completed
+- [x] Created database migrations for rubric configuration tables
+- [x] Seeded default rubric from COACHING_RUBRIC.md
+- [x] Implemented backend types for rubric configuration
+- [x] Created rubric service with CRUD operations
+- [x] Built REST API endpoints for rubric management
+- [x] Installed React Router and set up routing
+- [x] Added settings link to Sidebar
+- [x] Created useRubricConfig hook with local editing
+- [x] Built full RubricSettings page with:
+  - Category Weights Editor (sliders, weight validation)
+  - Scoring Criteria Editor (expandable per category)
+  - Red Flags Editor (toggle, thresholds, severity)
+  - Version History (restore, activate)
+  - Weight Distribution Bar visualization
+- [x] Created dynamic coaching prompt builder
+- [x] Modified coaching handler to use database rubric
+- [x] Verified both backend and frontend compile
+
+### Files Changed
+
+**Backend - New Files:**
+- `supabase/migrations/20260120100000_create_rubric_config.sql` — Database migration
+- `supabase/migrations/20260120100001_seed_default_rubric.sql` — Seed data
+- `src/types/rubric.types.ts` — TypeScript interfaces
+- `src/services/database/rubric.service.ts` — CRUD operations
+- `src/controllers/rubric.controller.ts` — Request handlers
+- `src/routes/rubric.routes.ts` — Route definitions
+- `src/prompts/coaching-prompt-builder.ts` — Dynamic prompt builder
+
+**Backend - Modified Files:**
+- `src/types/index.ts` — Export rubric types
+- `src/routes/index.ts` — Register rubric routes
+- `src/services/chat/handlers/coaching.handler.ts` — Use dynamic rubric
+
+**Frontend - New Files:**
+- `client/src/pages/Settings/RubricSettings.tsx` — Main settings page
+- `client/src/pages/Settings/components/CategoryWeightsEditor.tsx` — Weight sliders
+- `client/src/pages/Settings/components/ScoringCriteriaEditor.tsx` — Criteria text editor
+- `client/src/pages/Settings/components/RedFlagsEditor.tsx` — Red flags toggle/config
+- `client/src/pages/Settings/components/VersionHistory.tsx` — Version list/restore
+- `client/src/pages/Settings/components/WeightDistributionBar.tsx` — Visual bar
+- `client/src/pages/Settings/components/index.ts` — Component exports
+- `client/src/pages/Settings/index.ts` — Page exports
+- `client/src/hooks/useRubricConfig.ts` — Data fetching/mutations hook
+
+**Frontend - Modified Files:**
+- `client/package.json` — Added react-router-dom
+- `client/src/main.tsx` — Wrapped with BrowserRouter
+- `client/src/App.tsx` — Added routing, created ChatPage
+- `client/src/components/Sidebar/Sidebar.tsx` — Added settings link
+- `client/src/services/api.ts` — Added rubric API functions
+- `client/src/types/index.ts` — Added rubric types
+- `client/src/hooks/index.ts` — Export useRubricConfig
+
+### Database Schema
+
+**coaching_rubric_config:**
+- `id` UUID PRIMARY KEY
+- `name` TEXT (version name)
+- `description` TEXT
+- `version` INT (auto-incremented)
+- `is_active` BOOLEAN
+- `is_draft` BOOLEAN
+- Timestamps
+
+**rubric_categories:**
+- `id` UUID PRIMARY KEY
+- `rubric_config_id` FK
+- `name`, `slug`, `description`
+- `weight` DECIMAL (0-100)
+- `sort_order`, `is_enabled`
+
+**rubric_scoring_criteria:**
+- `id` UUID PRIMARY KEY
+- `category_id` FK
+- `score` INT (1-5)
+- `criteria_text` TEXT
+
+**rubric_red_flags:**
+- `id` UUID PRIMARY KEY
+- `rubric_config_id` FK
+- `flag_key`, `display_name`, `description`
+- `severity` (critical/high/medium)
+- `threshold_type` (boolean/percentage)
+- `threshold_value` DECIMAL
+- `is_enabled`, `sort_order`
+
+### API Endpoints
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/v1/rubric` | Get active rubric |
+| GET | `/api/v1/rubric/versions` | List all versions |
+| GET | `/api/v1/rubric/:id` | Get specific version |
+| POST | `/api/v1/rubric` | Create new version |
+| PUT | `/api/v1/rubric/:id` | Update draft |
+| POST | `/api/v1/rubric/:id/activate` | Activate version |
+| DELETE | `/api/v1/rubric/:id` | Delete draft |
+
+### Feature Highlights
+
+1. **Versioning**: Every save creates a new version; can restore any previous version
+2. **Weight Validation**: Real-time validation that weights sum to 100%
+3. **Dynamic Prompts**: Coaching handler fetches active rubric and builds prompts dynamically
+4. **Fallback**: If no database rubric exists, falls back to hardcoded prompts
+5. **Visual Feedback**: Distribution bar shows weight allocation visually
+
+### Next Steps
+- [ ] Run database migrations in production
+- [ ] Deploy backend and frontend
+- [ ] Test end-to-end with real coaching analysis
+- [ ] Add authentication
+- [ ] Set up error tracking (Sentry)

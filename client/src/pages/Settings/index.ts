@@ -1,0 +1,1 @@
+export { RubricSettings } from './RubricSettings';

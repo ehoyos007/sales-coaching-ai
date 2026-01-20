@@ -4,6 +4,7 @@ import agentsRoutes from './agents.routes.js';
 import callsRoutes from './calls.routes.js';
 import teamRoutes from './team.routes.js';
 import searchRoutes from './search.routes.js';
+import rubricRoutes from './rubric.routes.js';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/agents', agentsRoutes);
 router.use('/calls', callsRoutes);
 router.use('/team', teamRoutes);
 router.use('/search', searchRoutes);
+router.use('/rubric', rubricRoutes);
 
 // Health check endpoint
 router.get('/health', (_req, res) => {

@@ -2,6 +2,7 @@ import { HandlerParams, HandlerResult } from '../../../types/index.js';
 import { transcriptsService } from '../../database/transcripts.service.js';
 import { callsService } from '../../database/calls.service.js';
 import { agentsService } from '../../database/agents.service.js';
+import { rubricService } from '../../database/rubric.service.js';
 import { claudeService } from '../../ai/claude.service.js';
 import {
   COACHING_SYSTEM_PROMPT,
@@ -9,6 +10,11 @@ import {
   buildCoachingSummaryPrompt,
   CoachingVariables,
 } from '../../../prompts/coaching-analysis.js';
+import {
+  buildDynamicSystemPrompt,
+  buildDynamicCoachingPrompt,
+  buildDynamicSummaryPrompt,
+} from '../../../prompts/coaching-prompt-builder.js';
 
 /**
  * Coaching analysis result from Claude
@@ -90,6 +96,15 @@ export async function handleCoaching(
 
     console.log(`[coaching.handler] Transcript retrieved (${transcript.full_transcript.length} chars)`);
 
+    // Fetch the active rubric configuration from database
+    const rubricConfig = await rubricService.getActiveConfig();
+
+    if (rubricConfig) {
+      console.log(`[coaching.handler] Using dynamic rubric: "${rubricConfig.name}" (v${rubricConfig.version})`);
+    } else {
+      console.log(`[coaching.handler] No active rubric found, using hardcoded prompts`);
+    }
+
     // Prepare variables for the coaching analysis prompt
     const coachingVars: CoachingVariables = {
       agent_name: agentName,
@@ -100,15 +115,24 @@ export async function handleCoaching(
       transcript: transcript.full_transcript,
     };
 
-    // Build the analysis prompt
-    const analysisPrompt = buildCoachingAnalysisPrompt(coachingVars);
+    // Build the analysis prompt (dynamic if rubric exists, fallback to static)
+    let systemPrompt: string;
+    let analysisPrompt: string;
+
+    if (rubricConfig) {
+      systemPrompt = buildDynamicSystemPrompt(rubricConfig);
+      analysisPrompt = buildDynamicCoachingPrompt(rubricConfig, coachingVars);
+    } else {
+      systemPrompt = COACHING_SYSTEM_PROMPT;
+      analysisPrompt = buildCoachingAnalysisPrompt(coachingVars);
+    }
 
     console.log(`[coaching.handler] Sending transcript to Claude for analysis...`);
 
     // Call Claude to analyze the transcript
     // Using higher max tokens because coaching analysis is detailed
     const analysis = await claudeService.chatJSON<CoachingAnalysis>(
-      COACHING_SYSTEM_PROMPT,
+      systemPrompt,
       analysisPrompt,
       { maxTokens: 4096 }
     );
@@ -116,17 +140,28 @@ export async function handleCoaching(
     console.log(`[coaching.handler] Analysis complete - Overall score: ${analysis.overall_score}, Level: ${analysis.performance_level}`);
 
     // Now generate a human-friendly summary
-    const summaryPrompt = buildCoachingSummaryPrompt({
-      coaching_json: JSON.stringify(analysis, null, 2),
-      agent_name: agentName,
-      call_date: transcript.call_date || callMetadata.call_date,
-      duration: transcript.total_duration_formatted || 'Unknown',
-    });
+    let summaryPrompt: string;
+
+    if (rubricConfig) {
+      summaryPrompt = buildDynamicSummaryPrompt(rubricConfig, {
+        coaching_json: JSON.stringify(analysis, null, 2),
+        agent_name: agentName,
+        call_date: transcript.call_date || callMetadata.call_date,
+        duration: transcript.total_duration_formatted || 'Unknown',
+      });
+    } else {
+      summaryPrompt = buildCoachingSummaryPrompt({
+        coaching_json: JSON.stringify(analysis, null, 2),
+        agent_name: agentName,
+        call_date: transcript.call_date || callMetadata.call_date,
+        duration: transcript.total_duration_formatted || 'Unknown',
+      });
+    }
 
     console.log(`[coaching.handler] Generating coaching summary...`);
 
     const summaryResponse = await claudeService.chat(
-      COACHING_SYSTEM_PROMPT,
+      systemPrompt,
       summaryPrompt,
       { maxTokens: 2048, temperature: 0.7 }
     );
@@ -164,6 +199,8 @@ export async function handleCoaching(
         },
         summary: summaryResponse.content,
         has_critical_flags: hasCriticalFlags,
+        rubric_config_id: rubricConfig?.id || null,
+        rubric_version: rubricConfig?.version || null,
       },
     };
   } catch (error) {
