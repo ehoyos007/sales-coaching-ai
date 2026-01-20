@@ -216,7 +216,65 @@ Fixed transcript data not displaying and modal scroll issues in CallDetailsModal
 ```
 
 ### Next Steps
-- [ ] Implement coaching handler in backend
+- [x] Implement coaching handler in backend
 - [ ] Fix team summary response formatting
 - [ ] Add session/conversation history support
+- [ ] Deploy to production
+
+---
+
+## 2026-01-20 — Session 6
+
+### Summary
+Designed and implemented the complete coaching handler with rubric-based call analysis.
+
+### Completed
+- [x] Collaborated on coaching rubric design with user
+- [x] Created comprehensive `COACHING_RUBRIC.md` with 6 scoring categories
+- [x] Added tiered red flag system (Critical, High, Medium)
+- [x] Added Balance Care (Limited Medical) transition criteria
+- [x] Created coaching analysis prompts (`src/prompts/coaching-analysis.ts`)
+- [x] Implemented coaching handler (`src/services/chat/handlers/coaching.handler.ts`)
+- [x] Updated handler registry to use new coaching handler
+- [x] Added coaching response formatter with score breakdown
+- [x] Fixed existing bug in get-transcript handler (transcript.turns parsing)
+- [x] Updated PLAN.md with Phase 6 (Manager Configuration Panel) and data model
+- [x] Tested end-to-end with real call data
+
+### Files Changed
+- `COACHING_RUBRIC.md` — New: Complete coaching rubric with 6 categories, scoring criteria, red flags
+- `src/prompts/coaching-analysis.ts` — New: Coaching analysis and summary prompts
+- `src/services/chat/handlers/coaching.handler.ts` — New: Coaching handler implementation
+- `src/services/chat/handlers/index.ts` — Register new coaching handler
+- `src/services/chat/response.formatter.ts` — Add formatCoaching() function
+- `src/services/chat/handlers/get-transcript.handler.ts` — Fix transcript.turns parsing
+- `PLAN.md` — Added Phase 6 and configurable rubric data model
+
+### Coaching Rubric Structure
+| Category | Weight |
+|----------|--------|
+| Opening & Rapport | 10% |
+| Needs Discovery & Qualification | 30% |
+| Product Presentation | 20% |
+| Objection Handling | 20% |
+| Compliance & Disclosures | 10% |
+| Closing & Enrollment | 10% |
+
+### Key Features
+- Claude analyzes transcript against rubric and returns structured JSON
+- Scores each category 1-5 with weighted overall score
+- Identifies strengths with specific examples from transcript
+- Suggests improvements with action items
+- Detects red flags (talk ratio >70%, missing compliance elements, etc.)
+- Generates human-friendly summary for chat response
+
+### Git Activity
+```
+561b555 feat: implement coaching handler with rubric-based analysis
+```
+
+### Next Steps
+- [ ] Fix team summary response formatting
+- [ ] Add session/conversation history support
+- [ ] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Deploy to production
