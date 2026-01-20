@@ -137,3 +137,42 @@ f51ae9c feat: add React frontend and project documentation
 - [ ] Fix team summary response formatting
 - [ ] Add session/conversation history support
 - [ ] Deploy to production
+
+---
+
+## 2026-01-20 — Session 4
+
+### Summary
+Fixed TranscriptViewer crash when viewing call details.
+
+### Completed
+- [x] Diagnosed bug: `Cannot read properties of undefined (reading 'length')` at TranscriptViewer.tsx:119
+- [x] Root cause: Component accessed `transcript.turns` without null checks
+- [x] Fixed with safe access pattern: `transcript?.turns ?? []`
+- [x] Updated all references to use safe `turns` variable
+- [x] Verified build passes
+- [x] Committed and pushed fix
+
+### Files Changed
+- `client/src/components/CallDetails/TranscriptViewer.tsx` — Added null-safe access for turns array
+
+### Bug Details
+**Error:** `Uncaught TypeError: Cannot read properties of undefined (reading 'length')`
+
+**Cause:** API could return transcript object with undefined `turns` array
+
+**Fix:**
+```typescript
+const turns = transcript?.turns ?? [];
+```
+
+### Git Activity
+```
+75eafe0 fix: handle undefined transcript.turns in TranscriptViewer
+```
+
+### Next Steps
+- [ ] Implement coaching handler in backend
+- [ ] Fix team summary response formatting
+- [ ] Add session/conversation history support
+- [ ] Deploy to production
