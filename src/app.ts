@@ -8,43 +8,28 @@ import { requestLogger } from './middleware/logging.middleware.js';
 export function createApp(): Express {
   const app = express();
 
-  console.log('[CORS] Initializing with allowed origins:', config.cors.allowedOrigins);
-
-  // Middleware
+  // CORS middleware
   app.use(cors({
     origin: (origin, callback) => {
-      console.log('[CORS] Checking origin:', origin);
-      console.log('[CORS] Allowed origins:', config.cors.allowedOrigins);
-
       // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) {
-        console.log('[CORS] No origin - allowing');
-        return callback(null, true);
-      }
+      if (!origin) return callback(null, true);
 
-      // Check exact match first
+      // Check exact match
       if (config.cors.allowedOrigins.includes(origin)) {
-        console.log('[CORS] Exact match found - allowing');
         return callback(null, true);
       }
 
       // Check wildcard patterns (e.g., *.vercel.app)
       const isAllowed = config.cors.allowedOrigins.some(allowed => {
         if (allowed.startsWith('*.')) {
-          const domain = allowed.slice(2); // Remove "*."
-          const matches = origin.endsWith(domain);
-          console.log(`[CORS] Wildcard check: "${origin}".endsWith("${domain}") = ${matches}`);
-          return matches;
+          const domain = allowed.slice(2);
+          return origin.endsWith(domain);
         }
         return false;
       });
 
-      if (isAllowed) {
-        console.log('[CORS] Wildcard match - allowing');
-        return callback(null, true);
-      }
+      if (isAllowed) return callback(null, true);
 
-      console.log('[CORS] No match found - REJECTING');
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,

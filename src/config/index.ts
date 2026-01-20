@@ -10,15 +10,11 @@ function requireEnv(name: string): string {
   return value;
 }
 
-// Parse CORS origins with logging
-const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || 'http://localhost:5173';
-const parsedOrigins = rawAllowedOrigins
+// Parse CORS origins (supports comma-separated list, strips trailing slashes)
+const parsedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map(origin => origin.trim())
-  .map(origin => origin.replace(/\/$/, '')); // Remove trailing slashes
-
-console.log('[CONFIG] Raw ALLOWED_ORIGINS:', rawAllowedOrigins);
-console.log('[CONFIG] Parsed origins (normalized):', parsedOrigins);
+  .map(origin => origin.replace(/\/$/, ''));
 
 export const config = {
   server: {
