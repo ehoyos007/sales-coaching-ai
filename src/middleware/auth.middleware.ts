@@ -199,12 +199,19 @@ export const canAccessAgent = (
   }
 
   const targetAgentId =
+    req.params.agentId ||
     req.params.agentUserId ||
     (req.query.agent_user_id as string) ||
     req.body?.agent_user_id;
 
   if (!targetAgentId) {
     // No specific agent requested, proceed
+    next();
+    return;
+  }
+
+  // Admins can access any agent
+  if (req.profile.role === 'admin') {
     next();
     return;
   }

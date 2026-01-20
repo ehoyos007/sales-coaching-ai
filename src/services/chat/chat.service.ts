@@ -89,7 +89,9 @@ export async function processMessage(
     }
 
     // 4. Check data access permissions for agent-specific queries
-    if (params.agentId && dataScope) {
+    // Admins can access any agent's data
+    const isAdmin = userContext?.role === 'admin';
+    if (params.agentId && dataScope && !isAdmin) {
       // Check if the user can access this agent's data
       if (!dataScope.agentUserIds.includes(params.agentId)) {
         const errorMessage =
