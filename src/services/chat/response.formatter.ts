@@ -96,13 +96,19 @@ function formatAgentStats(data: Record<string, unknown>): string {
     return data.message as string || `No performance data found for ${agentName}.`;
   }
 
-  const totalCalls = performance.total_calls as number;
-  const avgDuration = performance.avg_duration_seconds as number;
+  const totalCalls = performance.total_calls as number ?? 0;
+  const avgDuration = (performance.avg_duration_seconds as number) ?? 0;
   const avgMins = Math.floor(avgDuration / 60);
   const avgSecs = Math.round(avgDuration % 60);
-  const agentTalkPct = Math.round(performance.avg_agent_talk_percentage as number);
-  const customerTalkPct = Math.round(performance.avg_customer_talk_percentage as number);
-  const avgTurns = Math.round(performance.avg_turns_per_call as number);
+  const agentTalkPct = performance.avg_agent_talk_percentage != null
+    ? Math.round(performance.avg_agent_talk_percentage as number)
+    : null;
+  const customerTalkPct = performance.avg_customer_talk_percentage != null
+    ? Math.round(performance.avg_customer_talk_percentage as number)
+    : null;
+  const avgTurns = performance.avg_turns_per_call != null
+    ? Math.round(performance.avg_turns_per_call as number)
+    : null;
 
   let response = `## ${agentName}'s Performance Summary\n`;
   response += `*${startDate} to ${endDate}*\n\n`;
@@ -111,8 +117,12 @@ function formatAgentStats(data: Record<string, unknown>): string {
   response += `|--------|-------|\n`;
   response += `| Total Calls | ${totalCalls} |\n`;
   response += `| Avg Duration | ${avgMins}m ${avgSecs}s |\n`;
-  response += `| Talk Ratio | Agent ${agentTalkPct}% / Customer ${customerTalkPct}% |\n`;
-  response += `| Avg Turns | ${avgTurns} |\n`;
+  if (agentTalkPct != null && customerTalkPct != null) {
+    response += `| Talk Ratio | Agent ${agentTalkPct}% / Customer ${customerTalkPct}% |\n`;
+  }
+  if (avgTurns != null) {
+    response += `| Avg Turns | ${avgTurns} |\n`;
+  }
 
   if (performance.inbound_calls !== undefined) {
     response += `| Inbound Calls | ${performance.inbound_calls} |\n`;
@@ -186,7 +196,7 @@ function formatTranscript(data: Record<string, unknown>): string {
   response += `| Duration | ${duration} |\n`;
   response += `| Type | ${isInbound ? 'Inbound' : 'Outbound'} |\n`;
 
-  if (talkRatio) {
+  if (talkRatio && talkRatio.agent != null && talkRatio.customer != null) {
     response += `| Talk Ratio | Agent ${Math.round(talkRatio.agent)}% / Customer ${Math.round(talkRatio.customer)}% |\n`;
   }
 
