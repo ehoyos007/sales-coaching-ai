@@ -577,7 +577,50 @@ fd5b7f9 fix(ui): enable scrolling in Call Detail transcript popup
 ```
 
 ### Next Steps
-- [ ] Fix Talk Ratio NaN% bug in agent stats formatter
+- [x] Fix Talk Ratio NaN% bug in agent stats formatter
+
+---
+
+## 2026-01-20 — Session 11
+
+### Summary
+Fixed Talk Ratio NaN% bug in agent stats formatter.
+
+### Completed
+- [x] Fixed `Math.round(undefined)` returning NaN in response formatter
+- [x] Added null checks for talk ratio and turns values
+- [x] Only display metrics rows when values exist
+
+### Files Changed
+- `src/services/chat/response.formatter.ts` — Added null checks before Math.round()
+
+### Bug Details
+**Problem:** Agent stats showing "Talk Ratio NaN% / Customer NaN%"
+
+**Cause:** `Math.round(undefined)` returns `NaN` when database values are null/undefined
+
+**Fix:**
+```typescript
+// Before
+const agentTalkPct = Math.round(performance.avg_agent_talk_percentage as number);
+
+// After
+const agentTalkPct = performance.avg_agent_talk_percentage != null
+  ? Math.round(performance.avg_agent_talk_percentage as number)
+  : null;
+
+// Only show row if values exist
+if (agentTalkPct != null && customerTalkPct != null) {
+  response += `| Talk Ratio | Agent ${agentTalkPct}% / Customer ${customerTalkPct}% |\n`;
+}
+```
+
+### Git Activity
+```
+e5ae9d1 fix: handle null/undefined values in talk ratio formatting
+```
+
+### Next Steps
 - [ ] Manager Configuration Panel (Phase 6) for rubric customization
 - [ ] Add authentication
 - [ ] Set up error tracking (Sentry)
