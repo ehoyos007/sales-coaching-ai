@@ -1004,3 +1004,44 @@ Token stored in localStorage → Auto-attached to all API requests
 - [ ] Consider adding rubric A/B testing capability
 - [ ] Add password reset flow
 - [ ] Add email verification for new signups
+
+---
+
+## 2026-01-20 — Session 17
+
+### Summary
+Troubleshot and resolved auth routes not being registered, verified authentication system working end-to-end.
+
+### Completed
+- [x] Diagnosed "Route not found: POST /api/v1/auth/signin" error
+- [x] Verified all auth route configurations are correct
+- [x] Rebuilt TypeScript project
+- [x] Restarted backend server with latest code
+- [x] Confirmed signin endpoint working via curl
+- [x] Updated TASKS.md with Session 16 auth accomplishments
+
+### Root Cause
+The backend server was running stale code from before the auth routes were added. A simple server restart picked up the compiled auth routes.
+
+### Verification
+```bash
+# Direct backend test - works
+curl http://localhost:3001/api/v1/auth/signin → {"success":false,"error":"Invalid login credentials"}
+
+# Through Vite proxy - works
+curl http://localhost:5173/api/v1/auth/signin → {"success":false,"error":"Invalid login credentials"}
+```
+
+### Files Changed
+- `TASKS.md` — Added Session 16 completion notes, marked auth checkbox done
+
+### Git Activity
+```
+2e6b902 docs: update TASKS.md with Session 16 auth completion
+```
+
+### Next Steps
+- [ ] Set up error tracking (Sentry)
+- [ ] Performance monitoring
+- [ ] Add password reset flow
+- [ ] Add email verification for new signups
