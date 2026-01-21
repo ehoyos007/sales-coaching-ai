@@ -273,7 +273,7 @@ export const LoginPage: React.FC = () => {
                     disabled={isSubmitting}
                     className="relative w-full group"
                   >
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl blur opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl blur opacity-60 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                     <div className="relative flex w-full justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                       {isSubmitting && <LoadingSpinner size="sm" className="text-white" />}
                       {isSubmitting
