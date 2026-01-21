@@ -1,6 +1,7 @@
 import { HandlerParams, HandlerResult } from '../../../types/index.js';
 import { teamService } from '../../database/team.service.js';
 import { getDateRange } from '../../../utils/date.utils.js';
+import { ErrorMessages, buildErrorMessage, formatError } from '../../../utils/error-messages.js';
 
 export async function handleTeamSummary(
   params: HandlerParams,
@@ -31,7 +32,7 @@ export async function handleTeamSummary(
           start_date: startDate,
           end_date: endDate,
           summary: null,
-          message: `No data found for the ${department} team in the specified date range.`,
+          message: ErrorMessages.noTeamData(department, startDate, endDate),
         },
       };
     }
@@ -47,11 +48,6 @@ export async function handleTeamSummary(
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return {
-      success: false,
-      data: null,
-      error: `Failed to fetch team summary: ${message}`,
-    };
+    return formatError(buildErrorMessage(error, { operation: 'fetch team summary' }));
   }
 }

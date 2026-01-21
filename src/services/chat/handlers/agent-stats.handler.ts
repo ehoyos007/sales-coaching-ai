@@ -2,6 +2,7 @@ import { HandlerParams, HandlerResult } from '../../../types/index.js';
 import { callsService } from '../../database/calls.service.js';
 import { agentsService } from '../../database/agents.service.js';
 import { getDateRange } from '../../../utils/date.utils.js';
+import { ErrorMessages, buildErrorMessage, formatError } from '../../../utils/error-messages.js';
 
 export async function handleAgentStats(
   params: HandlerParams,
@@ -15,22 +16,14 @@ export async function handleAgentStats(
     if (!agentId && agentName) {
       const resolved = await agentsService.resolveByName(agentName);
       if (!resolved) {
-        return {
-          success: false,
-          data: null,
-          error: `Could not find an agent named "${agentName}". Please check the spelling or try a different name.`,
-        };
+        return formatError(ErrorMessages.agentNotFound(agentName));
       }
       agentId = resolved.agent_user_id;
       agentName = resolved.first_name;
     }
 
     if (!agentId) {
-      return {
-        success: false,
-        data: null,
-        error: 'Please specify which agent\'s performance you want to see.',
-      };
+      return formatError(ErrorMessages.agentRequired());
     }
 
     // Get agent details if we don't have the name
@@ -61,7 +54,7 @@ export async function handleAgentStats(
           start_date: startDate,
           end_date: endDate,
           performance: null,
-          message: `No calls found for ${agentName} in the specified date range.`,
+          message: ErrorMessages.noAgentStats(agentName!, startDate, endDate),
         },
       };
     }
@@ -86,11 +79,6 @@ export async function handleAgentStats(
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return {
-      success: false,
-      data: null,
-      error: `Failed to fetch agent stats: ${message}`,
-    };
+    return formatError(buildErrorMessage(error, { operation: 'fetch agent stats' }));
   }
 }

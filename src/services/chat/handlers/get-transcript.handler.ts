@@ -2,6 +2,7 @@ import { HandlerParams, HandlerResult } from '../../../types/index.js';
 import { transcriptsService } from '../../database/transcripts.service.js';
 import { callsService } from '../../database/calls.service.js';
 import { agentsService } from '../../database/agents.service.js';
+import { ErrorMessages, buildErrorMessage, formatError } from '../../../utils/error-messages.js';
 
 export async function handleGetTranscript(
   params: HandlerParams,
@@ -11,21 +12,13 @@ export async function handleGetTranscript(
     const callId = params.callId;
 
     if (!callId) {
-      return {
-        success: false,
-        data: null,
-        error: 'Please specify which call transcript you want to see. You can provide a call ID.',
-      };
+      return formatError(ErrorMessages.callRequired());
     }
 
     // First get call metadata
     const callMetadata = await callsService.getCallById(callId);
     if (!callMetadata) {
-      return {
-        success: false,
-        data: null,
-        error: `Could not find a call with ID "${callId}".`,
-      };
+      return formatError(ErrorMessages.callNotFound(callId));
     }
 
     // Get agent details
@@ -89,11 +82,6 @@ export async function handleGetTranscript(
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return {
-      success: false,
-      data: null,
-      error: `Failed to fetch transcript: ${message}`,
-    };
+    return formatError(buildErrorMessage(error, { operation: 'fetch transcript' }));
   }
 }

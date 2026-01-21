@@ -3,6 +3,7 @@ import { searchService } from '../../database/search.service.js';
 import { agentsService } from '../../database/agents.service.js';
 import { embeddingsService } from '../../ai/embeddings.service.js';
 import { getDateRange } from '../../../utils/date.utils.js';
+import { ErrorMessages, buildErrorMessage, formatError } from '../../../utils/error-messages.js';
 
 export async function handleSearchCalls(
   params: HandlerParams,
@@ -12,11 +13,7 @@ export async function handleSearchCalls(
     const searchQuery = params.searchQuery;
 
     if (!searchQuery) {
-      return {
-        success: false,
-        data: null,
-        error: 'Please specify what you want to search for in the calls.',
-      };
+      return formatError(ErrorMessages.searchQueryRequired());
     }
 
     // Resolve agent if specified
@@ -68,7 +65,7 @@ export async function handleSearchCalls(
             end_date: endDate,
             result_count: 0,
             results: [],
-            message: `No calls found matching "${searchQuery}".`,
+            message: ErrorMessages.noSearchResults(searchQuery),
           },
         };
       }
@@ -102,11 +99,6 @@ export async function handleSearchCalls(
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return {
-      success: false,
-      data: null,
-      error: `Failed to search calls: ${message}`,
-    };
+    return formatError(buildErrorMessage(error, { operation: 'search calls' }));
   }
 }

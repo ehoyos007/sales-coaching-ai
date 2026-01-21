@@ -19,10 +19,6 @@ Preparing for deployment and adding polish features
 
 ### Medium Priority
 
-- [ ] **Improve Error Messages**
-  - Description: More user-friendly error messages when agent not found, no data, etc.
-  - Files: `src/services/chat/handlers/*.ts`
-
 - [ ] **Add Loading States to Sidebar**
   - Description: Show skeleton loaders while agents are loading
   - Files: `client/src/components/Sidebar/AgentList.tsx`
@@ -48,6 +44,15 @@ Preparing for deployment and adding polish features
 ---
 
 ## ✅ Done
+
+### Session 21 (2026-01-21)
+- [x] Improved error messages across all chat handlers
+  - Created centralized `src/utils/error-messages.ts` utility
+  - Added ErrorMessages object with user-friendly messages and suggestions
+  - Added buildErrorMessage() for classifying and formatting errors
+  - Updated all 7 handlers to use consistent error handling
+  - Empty states now include actionable suggestions
+  - Technical errors hidden from users, logged for debugging
 
 ### Session 19 (2026-01-20)
 - [x] Set up Sentry error tracking for backend and frontend
@@ -183,4 +188,4 @@ Preparing for deployment and adding polish features
 
 ---
 
-**Last Updated:** 2026-01-20 (Session 19)
+**Last Updated:** 2026-01-21 (Session 21)

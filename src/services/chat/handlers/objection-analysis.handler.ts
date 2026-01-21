@@ -9,6 +9,7 @@ import {
   buildObjectionSummaryPrompt,
   ObjectionAnalysisVariables,
 } from '../../../prompts/objection-analysis.js';
+import { ErrorMessages, buildErrorMessage, formatError } from '../../../utils/error-messages.js';
 
 /**
  * Individual objection found in the call
@@ -69,12 +70,7 @@ export async function handleObjectionAnalysis(
     const callId = params.callId;
 
     if (!callId) {
-      return {
-        success: false,
-        data: null,
-        error:
-          'Please specify which call you want to analyze for objections. You can provide a call ID or ask about a specific agent\'s recent calls.',
-      };
+      return formatError(ErrorMessages.callRequired());
     }
 
     console.log(`[objection-analysis.handler] Starting objection analysis for call: ${callId}`);
@@ -82,11 +78,7 @@ export async function handleObjectionAnalysis(
     // Get call metadata first
     const callMetadata = await callsService.getCallById(callId);
     if (!callMetadata) {
-      return {
-        success: false,
-        data: null,
-        error: `Could not find a call with ID "${callId}".`,
-      };
+      return formatError(ErrorMessages.callNotFound(callId));
     }
 
     // Get agent details
@@ -99,11 +91,7 @@ export async function handleObjectionAnalysis(
     const transcript = await transcriptsService.getCallTranscript(callId);
 
     if (!transcript || !transcript.full_transcript) {
-      return {
-        success: false,
-        data: null,
-        error: `Could not find transcript data for call "${callId}". The transcript may not have been processed yet.`,
-      };
+      return formatError(ErrorMessages.transcriptNotReady(callId));
     }
 
     console.log(`[objection-analysis.handler] Transcript retrieved (${transcript.full_transcript.length} chars)`);
@@ -171,12 +159,7 @@ export async function handleObjectionAnalysis(
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error(`[objection-analysis.handler] Error:`, error);
-    return {
-      success: false,
-      data: null,
-      error: `Failed to analyze objections: ${message}`,
-    };
+    return formatError(buildErrorMessage(error, { operation: 'analyze objections' }));
   }
 }

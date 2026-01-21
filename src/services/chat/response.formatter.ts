@@ -1,6 +1,7 @@
 import { Intent } from '../../types/index.js';
 import { claudeService } from '../ai/claude.service.js';
 import { buildResponsePrompt } from '../../prompts/response-formatting.js';
+import { ErrorMessages } from '../../utils/error-messages.js';
 
 interface FormatContext {
   intent: Intent;
@@ -62,7 +63,7 @@ function formatCallList(data: Record<string, unknown>): string {
   const calls = data.calls as Array<Record<string, unknown>>;
 
   if (!calls || calls.length === 0) {
-    return `No calls found for ${agentName} between ${startDate} and ${endDate}.`;
+    return ErrorMessages.emptyCallList(agentName, startDate, endDate);
   }
 
   let response = `Here are **${agentName}'s** calls from ${startDate} to ${endDate}:\n\n`;
