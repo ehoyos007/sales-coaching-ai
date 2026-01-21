@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { RoleBadge } from '../common/RoleBadge';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 
 export const UserMenu: React.FC = () => {
   const { user, signOut, isLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -48,20 +50,27 @@ export const UserMenu: React.FC = () => {
     );
   }
 
-  const displayName = user.name || user.email.split('@')[0];
+  const displayName = user.name || user.email?.split('@')[0] || 'User';
   const initials = displayName
     .split(' ')
+    .filter((n) => n.length > 0)
     .map((n) => n[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || '?';
 
   const canAccessSettings = user.role === 'admin' || user.role === 'manager';
   const canAccessAdmin = user.role === 'admin';
 
   const handleSignOut = async () => {
-    setIsOpen(false);
-    await signOut();
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      setIsSigningOut(false);
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -197,23 +206,29 @@ export const UserMenu: React.FC = () => {
           <div className="border-t border-slate-100 pt-1">
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              disabled={isSigningOut}
+              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               role="menuitem"
+              aria-busy={isSigningOut}
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              Sign Out
+              {isSigningOut ? (
+                <LoadingSpinner size="sm" className="text-red-600" />
+              ) : (
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              )}
+              {isSigningOut ? 'Signing out...' : 'Sign Out'}
             </button>
           </div>
         </div>

@@ -135,8 +135,8 @@ export const UserTable: React.FC<UserTableProps> = ({
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
                       <span className="text-sm font-medium text-primary-700">
-                        {user.first_name.charAt(0).toUpperCase()}
-                        {user.last_name?.charAt(0).toUpperCase() || ''}
+                        {(user.first_name ?? '?').charAt(0).toUpperCase()}
+                        {user.last_name?.charAt(0).toUpperCase() ?? ''}
                       </span>
                     </div>
                     <div>
@@ -165,7 +165,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                         user.role
                       )}`}
                     >
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      {(user.role ?? 'unknown').charAt(0).toUpperCase() + (user.role ?? 'unknown').slice(1)}
                     </span>
                   )}
                 </td>
