@@ -1,5 +1,70 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 29
+
+### Summary
+Fixed account creation button not responding to clicks on the login page.
+
+### Completed
+- [x] Debugged registration form submission issue
+- [x] Traced click handler through LoginPage → AuthContext → API → Backend
+- [x] Identified root cause: decorative blur div intercepting pointer events
+- [x] Fixed by adding `pointer-events-none` to blur overlay on submit button
+- [x] Committed and pushed fix
+
+### Files Modified
+- `client/src/pages/Login/LoginPage.tsx` — Added `pointer-events-none` to decorative blur div
+
+### Bug Details
+**Problem:** Clicking the "Create Account" button did nothing — no loading state, no error, no response
+
+**Cause:** The decorative blur div inside the submit button (`absolute -inset-0.5 ... blur`) was intercepting click events before they reached the button element
+
+**Fix:**
+```tsx
+// Before
+<div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl blur opacity-60 ..." />
+
+// After
+<div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl blur opacity-60 ... pointer-events-none" />
+```
+
+### Git Activity
+```
+6a9b600 fix(login): prevent decorative blur overlay from blocking click events on submit button
+```
+
+---
+
+## 2026-01-21 — Session 28
+
+### Summary
+Fixed objection analysis to display verbatim Customer/Agent transcript snippets.
+
+### Completed
+- [x] Diagnosed bug: formatter was short-circuiting to return Claude's summary, bypassing structured analysis with snippets
+- [x] Fixed `formatObjectionAnalysis()` to always render structured analysis with verbatim quotes
+- [x] Added coaching summary as a separate section at the end
+- [x] Deployed fix to Railway production
+- [x] Verified snippets now display correctly
+
+### Files Modified
+- `src/services/chat/response.formatter.ts` — Removed summary short-circuit, added coaching summary section
+
+### Bug Details
+**Problem:** Objection analysis wasn't showing verbatim Customer/Agent snippets
+
+**Cause:** Line 433-436 had `if (data.summary) { return data.summary; }` which returned Claude's natural language summary directly, skipping the structured analysis formatting
+
+**Fix:** Always format structured analysis to show snippets, append coaching summary at the end
+
+### Git Activity
+```
+84c743d fix(objection-analysis): display verbatim snippets instead of summary-only
+```
+
+---
+
 ## 2026-01-21 — Session 27
 
 ### Summary

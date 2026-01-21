@@ -43,6 +43,18 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 29 (2026-01-21)
+- [x] Fixed account creation button not responding to clicks
+  - Bug: Decorative blur overlay was intercepting pointer events
+  - Fix: Added `pointer-events-none` to blur div on submit button
+  - File: `client/src/pages/Login/LoginPage.tsx`
+
+### Session 28 (2026-01-21)
+- [x] Fixed objection analysis to display verbatim snippets
+  - Bug: Formatter was short-circuiting to return summary, skipping structured analysis
+  - Fix: Always render structured analysis with Customer/Agent quotes, append summary at end
+  - Deployed to Railway production
+
 ### Session 27 (2026-01-21)
 - [x] Fixed Admin Panel team management issues
   - Added Delete Team button with confirmation dialog to edit modal
@@ -232,4 +244,4 @@ Preparing for deployment and adding polish features
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 22)
+**Last Updated:** 2026-01-21 (Session 29)
