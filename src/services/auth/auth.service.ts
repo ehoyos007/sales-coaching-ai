@@ -21,6 +21,7 @@ export interface Team {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  member_count?: number;
 }
 
 export interface UserProfile {
@@ -295,16 +296,80 @@ export class AuthService {
   async createTeam(
     adminUserId: string,
     name: string,
-    description?: string
+    description?: string,
+    managerId?: string
   ): Promise<{ success: boolean; team?: Team; error?: string }> {
     const adminProfile = await this.getUserProfile(adminUserId);
     if (!adminProfile || adminProfile.role !== 'admin') {
       return { success: false, error: 'Only admin can create teams' };
     }
 
+    // If managerId is provided, verify the user exists and is a manager
+    if (managerId) {
+      const managerProfile = await this.getUserProfile(managerId);
+      if (!managerProfile) {
+        return { success: false, error: 'Manager user not found' };
+      }
+      if (managerProfile.role !== 'manager' && managerProfile.role !== 'admin') {
+        return { success: false, error: 'Selected user must have manager or admin role' };
+      }
+    }
+
     const { data, error } = await this.dbClient
       .from('teams')
-      .insert({ name, description })
+      .insert({ name, description, manager_id: managerId || null })
+      .select()
+      .single();
+
+    return error
+      ? { success: false, error: error.message }
+      : { success: true, team: data as Team };
+  }
+
+  async updateTeam(
+    adminUserId: string,
+    teamId: string,
+    updates: { name?: string; description?: string; manager_id?: string | null }
+  ): Promise<{ success: boolean; team?: Team; error?: string }> {
+    const adminProfile = await this.getUserProfile(adminUserId);
+    if (!adminProfile || adminProfile.role !== 'admin') {
+      return { success: false, error: 'Only admin can update teams' };
+    }
+
+    // Verify team exists
+    const { data: existingTeam, error: fetchError } = await this.dbClient
+      .from('teams')
+      .select('*')
+      .eq('id', teamId)
+      .single();
+
+    if (fetchError || !existingTeam) {
+      return { success: false, error: 'Team not found' };
+    }
+
+    // If manager_id is being updated, verify the user exists and has appropriate role
+    if (updates.manager_id !== undefined && updates.manager_id !== null) {
+      const managerProfile = await this.getUserProfile(updates.manager_id);
+      if (!managerProfile) {
+        return { success: false, error: 'Manager user not found' };
+      }
+      if (managerProfile.role !== 'manager' && managerProfile.role !== 'admin') {
+        return { success: false, error: 'Selected user must have manager or admin role' };
+      }
+    }
+
+    // Build update object
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.manager_id !== undefined) updateData.manager_id = updates.manager_id;
+
+    const { data, error } = await this.dbClient
+      .from('teams')
+      .update(updateData)
+      .eq('id', teamId)
       .select()
       .single();
 
@@ -314,13 +379,36 @@ export class AuthService {
   }
 
   async getAllTeams(): Promise<Team[]> {
-    const { data, error } = await this.dbClient
+    // Get teams with member count
+    const { data: teams, error } = await this.dbClient
       .from('teams')
       .select('*')
       .eq('is_active', true)
       .order('name');
 
-    return error ? [] : (data as Team[]);
+    if (error || !teams) return [];
+
+    // Get member counts for all teams
+    const { data: memberCounts } = await this.dbClient
+      .from('user_profiles')
+      .select('team_id')
+      .not('team_id', 'is', null);
+
+    // Calculate member count per team
+    const countMap = new Map<string, number>();
+    if (memberCounts) {
+      for (const profile of memberCounts) {
+        if (profile.team_id) {
+          countMap.set(profile.team_id, (countMap.get(profile.team_id) || 0) + 1);
+        }
+      }
+    }
+
+    // Add member_count to each team
+    return teams.map(team => ({
+      ...team,
+      member_count: countMap.get(team.id) || 0,
+    })) as Team[];
   }
 
   async getTeamMembers(teamId: string): Promise<TeamMember[]> {

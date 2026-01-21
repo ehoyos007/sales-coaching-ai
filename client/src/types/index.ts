@@ -21,6 +21,7 @@ export interface Team {
   id: string;
   name: string;
   description: string | null;
+  manager_id: string | null;
   created_at: string;
   updated_at: string;
   member_count?: number;

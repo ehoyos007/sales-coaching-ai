@@ -345,11 +345,22 @@ export async function getAdminTeams(): Promise<ApiResponse<{ teams: Team[]; coun
 
 export async function createTeam(
   name: string,
-  description?: string
+  description?: string,
+  managerId?: string
 ): Promise<ApiResponse<{ team: Team }>> {
   return request<ApiResponse<{ team: Team }>>('/admin/teams', {
     method: 'POST',
-    body: JSON.stringify({ name, description }),
+    body: JSON.stringify({ name, description, manager_id: managerId }),
+  });
+}
+
+export async function updateTeam(
+  teamId: string,
+  updates: { name?: string; description?: string; manager_id?: string | null }
+): Promise<ApiResponse<{ team: Team }>> {
+  return request<ApiResponse<{ team: Team }>>(`/admin/teams/${teamId}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
   });
 }
 

@@ -199,7 +199,7 @@ router.get('/teams', async (req: Request, res: Response) => {
 // =============================================
 router.post('/teams', async (req: Request, res: Response) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, manager_id } = req.body;
 
     if (!name || typeof name !== 'string') {
       res.status(400).json({
@@ -209,7 +209,7 @@ router.post('/teams', async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await authService.createTeam(req.user!.id, name, description);
+    const result = await authService.createTeam(req.user!.id, name, description, manager_id);
 
     if (!result.success) {
       res.status(400).json({
@@ -231,6 +231,49 @@ router.post('/teams', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Failed to create team',
+    });
+  }
+});
+
+// =============================================
+// PUT /admin/teams/:teamId - Update a team
+// =============================================
+router.put('/teams/:teamId', async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.params;
+    const { name, description, manager_id } = req.body;
+
+    // At least one field must be provided
+    if (name === undefined && description === undefined && manager_id === undefined) {
+      res.status(400).json({
+        success: false,
+        error: 'At least one field (name, description, or manager_id) must be provided',
+      });
+      return;
+    }
+
+    const result = await authService.updateTeam(req.user!.id, teamId, { name, description, manager_id });
+
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+      });
+      return;
+    }
+
+    console.log(`[admin.routes] Team updated: ${teamId} (by ${req.user?.email})`);
+
+    res.json({
+      success: true,
+      message: 'Team updated successfully',
+      data: { team: result.team },
+    });
+  } catch (error) {
+    console.error('[admin.routes] Update team error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update team',
     });
   }
 });
