@@ -15,9 +15,10 @@ Dashboard pages deployed, ready for production testing
 
 ### High Priority
 
-- [ ] **Run Dashboard Migration in Production**
-  - Description: Apply `20260122000001_add_dashboard_tables.sql` to Supabase production
-  - Includes: compliance_scores, agent_goals tables, RPC functions
+- [x] **Run Dashboard Migration in Production** ✓ Completed
+  - Applied `20260122000001_add_dashboard_tables.sql` to Supabase production
+  - Tables: compliance_scores, agent_goals
+  - RPC functions: get_team_overview_metrics, get_agent_overview_metrics, get_call_volume_trend, get_compliance_summary, get_goals_progress, get_objection_summary
 
 - [ ] **Deploy Dashboard Changes**
   - Description: Deploy backend to Railway, frontend to Vercel
