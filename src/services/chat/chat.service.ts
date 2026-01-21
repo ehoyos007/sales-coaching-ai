@@ -73,6 +73,7 @@ export async function processMessage(
       daysBack: classification.days_back,
       callId: classification.call_id || context?.call_id || undefined,
       searchQuery: classification.search_query || undefined,
+      minDurationMinutes: classification.min_duration_minutes || undefined,
       department: context?.department,
       // Auth context
       dataScope,

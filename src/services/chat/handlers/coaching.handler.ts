@@ -4,6 +4,7 @@ import { callsService } from '../../database/calls.service.js';
 import { agentsService } from '../../database/agents.service.js';
 import { rubricService } from '../../database/rubric.service.js';
 import { claudeService } from '../../ai/claude.service.js';
+import { getDateRange } from '../../../utils/date.utils.js';
 import {
   COACHING_SYSTEM_PROMPT,
   buildCoachingAnalysisPrompt,
@@ -48,6 +49,126 @@ export interface CoachingAnalysis {
 }
 
 /**
+ * Handle aggregate coaching - provide coaching recommendations based on recent calls
+ */
+async function handleAggregateCoaching(params: HandlerParams): Promise<HandlerResult> {
+  console.log('[coaching.handler] Generating aggregate coaching recommendations...');
+
+  // Get date range for recent calls
+  const { startDate, endDate } = getDateRange(params.daysBack || 7);
+
+  // Fetch recent calls
+  const recentCalls = await callsService.getRecentCalls(startDate, endDate, 10);
+
+  if (recentCalls.length === 0) {
+    return {
+      success: true,
+      data: {
+        type: 'aggregate_coaching',
+        start_date: startDate,
+        end_date: endDate,
+        call_count: 0,
+        summary: 'No calls found in the selected time period. Try expanding the date range to get coaching recommendations.',
+        recommendations: [],
+      },
+    };
+  }
+
+  // Gather call summaries with available metrics
+  const callSummaries: string[] = [];
+  for (const call of recentCalls) {
+    const agentId = call.agent_user_id;
+    const agent = agentId ? await agentsService.getAgentById(agentId) : null;
+    const agentName = agent?.first_name || 'Unknown';
+    const durationSeconds = call.total_duration_seconds || call.duration_seconds || 0;
+    const durationMins = Math.round(durationSeconds / 60);
+    const talkRatio = call.agent_talk_percentage
+      ? `Agent ${call.agent_talk_percentage}% / Customer ${call.customer_talk_percentage}%`
+      : 'N/A';
+
+    callSummaries.push(
+      `- ${agentName}: ${call.call_date}, ${durationMins} min, Talk ratio: ${talkRatio}`
+    );
+  }
+
+  // Generate aggregate coaching tips using Claude
+  const systemPrompt = `You are a sales coaching expert at First Health Enrollment.
+Analyze call patterns and provide actionable coaching recommendations for the team.
+Focus on practical, specific tips that can improve call performance.`;
+
+  const analysisPrompt = `Based on ${recentCalls.length} recent calls from ${startDate} to ${endDate}, provide coaching recommendations.
+
+Call summaries:
+${callSummaries.join('\n')}
+
+Provide 3-5 actionable coaching tips that would help improve team performance. Consider:
+- Talk time ratios (ideal is around 40% agent, 60% customer)
+- Call duration patterns
+- Common improvement areas in sales calls
+
+Respond with a JSON object:
+{
+  "team_insights": "A 2-3 sentence summary of observed patterns",
+  "recommendations": [
+    {
+      "title": "Short title for the tip",
+      "description": "Detailed explanation and how to implement",
+      "priority": "high" | "medium" | "low"
+    }
+  ],
+  "focus_area": "The single most important area to focus on"
+}`;
+
+  console.log('[coaching.handler] Generating aggregate coaching insights...');
+
+  const insights = await claudeService.chatJSON<{
+    team_insights: string;
+    recommendations: Array<{
+      title: string;
+      description: string;
+      priority: string;
+    }>;
+    focus_area: string;
+  }>(systemPrompt, analysisPrompt, { maxTokens: 2048 });
+
+  // Generate human-friendly summary
+  const summaryPrompt = `Based on these coaching insights, write a brief, encouraging summary for managers:
+
+Team Insights: ${insights.team_insights}
+Focus Area: ${insights.focus_area}
+
+Key Recommendations:
+${insights.recommendations.map(r => `- ${r.title}: ${r.description}`).join('\n')}
+
+Write 2-3 paragraphs that:
+1. Acknowledge what's working well
+2. Highlight the top priority area for improvement
+3. Suggest a specific action step for this week`;
+
+  const summaryResponse = await claudeService.chat(
+    systemPrompt,
+    summaryPrompt,
+    { maxTokens: 1024, temperature: 0.7 }
+  );
+
+  console.log('[coaching.handler] Aggregate coaching complete');
+
+  return {
+    success: true,
+    data: {
+      type: 'aggregate_coaching',
+      start_date: startDate,
+      end_date: endDate,
+      call_count: recentCalls.length,
+      team_insights: insights.team_insights,
+      focus_area: insights.focus_area,
+      recommendations: insights.recommendations,
+      summary: summaryResponse.content,
+    },
+  };
+}
+
+/**
  * Handle coaching intent - analyze a call transcript and provide coaching feedback
  */
 export async function handleCoaching(
@@ -57,8 +178,9 @@ export async function handleCoaching(
   try {
     const callId = params.callId;
 
+    // If no callId provided, generate aggregate coaching recommendations
     if (!callId) {
-      return formatError(ErrorMessages.coachingCallRequired());
+      return handleAggregateCoaching(params);
     }
 
     console.log(`[coaching.handler] Starting coaching analysis for call: ${callId}`);

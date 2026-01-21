@@ -56,27 +56,54 @@ export async function formatResponse(context: FormatContext): Promise<string> {
 }
 
 function formatCallList(data: Record<string, unknown>): string {
-  const agentName = data.agent_name as string;
+  const agentName = data.agent_name as string | null;
   const startDate = data.start_date as string;
   const endDate = data.end_date as string;
   const callCount = data.call_count as number;
   const calls = data.calls as Array<Record<string, unknown>>;
+  const viewType = data.view_type as string | undefined;
+  const minDurationMinutes = data.min_duration_minutes as number | undefined;
 
   if (!calls || calls.length === 0) {
-    return ErrorMessages.emptyCallList(agentName, startDate, endDate);
+    if (viewType === 'long_calls') {
+      return `No calls found longer than ${minDurationMinutes || 10} minutes from ${startDate} to ${endDate}.\n\nTry reducing the minimum duration or expanding the date range.`;
+    }
+    if (viewType === 'all_agents') {
+      return `No calls found from ${startDate} to ${endDate}.\n\nTry expanding the date range.`;
+    }
+    return ErrorMessages.emptyCallList(agentName || 'Unknown', startDate, endDate);
   }
 
-  let response = `Here are **${agentName}'s** calls from ${startDate} to ${endDate}:\n\n`;
-  response += `**Total calls:** ${callCount}\n\n`;
+  // Build header based on view type
+  let response = '';
+  if (viewType === 'long_calls') {
+    response = `## Long Calls (${minDurationMinutes}+ minutes)\n`;
+    response += `*${startDate} to ${endDate}*\n\n`;
+    response += `**Found ${callCount} calls**\n\n`;
+  } else if (viewType === 'all_agents') {
+    response = `## Recent Calls (All Agents)\n`;
+    response += `*${startDate} to ${endDate}*\n\n`;
+    response += `**Total calls:** ${callCount}\n\n`;
+  } else {
+    response = `Here are **${agentName}'s** calls from ${startDate} to ${endDate}:\n\n`;
+    response += `**Total calls:** ${callCount}\n\n`;
+  }
 
-  // Format call list
+  // Format call list - include agent name when showing all agents
   const callLines = calls.slice(0, 10).map((call, i) => {
     const direction = call.is_inbound_call ? '📥 Inbound' : '📤 Outbound';
-    const duration = call.total_duration_formatted || 'N/A';
+    const duration = call.total_duration_formatted || formatDuration(call.duration_seconds as number);
     const turns = call.total_turns || 0;
     const callId = (call.call_id as string)?.slice(0, 8) || 'N/A';
+    const callAgentId = call.agent_user_id as string;
 
-    return `${i + 1}. **${call.call_date}** - ${duration} (${direction}, ${turns} turns)\n   ID: \`${callId}...\``;
+    // For all-agents view, include agent info
+    let agentInfo = '';
+    if (viewType === 'all_agents' || viewType === 'long_calls') {
+      agentInfo = callAgentId ? ` | Agent: \`${callAgentId.slice(0, 8)}...\`` : '';
+    }
+
+    return `${i + 1}. **${call.call_date}** - ${duration} (${direction}, ${turns} turns)${agentInfo}\n   ID: \`${callId}...\``;
   });
 
   response += callLines.join('\n\n');
@@ -88,6 +115,13 @@ function formatCallList(data: Record<string, unknown>): string {
   response += '\n\nWant to see the transcript for any of these calls?';
 
   return response;
+}
+
+function formatDuration(seconds: number | undefined): string {
+  if (!seconds) return 'N/A';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return `${mins}m ${secs}s`;
 }
 
 function formatAgentStats(data: Record<string, unknown>): string {
@@ -224,6 +258,11 @@ function formatTranscript(data: Record<string, unknown>): string {
 }
 
 function formatCoaching(data: Record<string, unknown>): string {
+  // Handle aggregate coaching (no specific call)
+  if (data.type === 'aggregate_coaching') {
+    return formatAggregateCoaching(data);
+  }
+
   // If we have a pre-generated summary from Claude, use it
   if (data.summary) {
     return data.summary as string;
@@ -322,6 +361,60 @@ function formatCoaching(data: Record<string, unknown>): string {
         response += `- ⚠️ ${flag}\n`;
       });
     }
+  }
+
+  return response;
+}
+
+function formatAggregateCoaching(data: Record<string, unknown>): string {
+  const startDate = data.start_date as string;
+  const endDate = data.end_date as string;
+  const callCount = data.call_count as number;
+  const teamInsights = data.team_insights as string | undefined;
+  const focusArea = data.focus_area as string | undefined;
+  const recommendations = data.recommendations as Array<{
+    title: string;
+    description: string;
+    priority: string;
+  }> | undefined;
+  const summary = data.summary as string | undefined;
+
+  // If we have a pre-generated summary, use it
+  if (summary) {
+    let response = `## Team Coaching Recommendations\n`;
+    response += `*Based on ${callCount} calls from ${startDate} to ${endDate}*\n\n`;
+    response += summary;
+
+    // Add structured recommendations if available
+    if (recommendations && recommendations.length > 0) {
+      response += `\n\n### Action Items\n\n`;
+      recommendations.forEach((rec, i) => {
+        const priorityEmoji = rec.priority === 'high' ? '🔴' : rec.priority === 'medium' ? '🟡' : '🟢';
+        response += `${i + 1}. ${priorityEmoji} **${rec.title}**\n   ${rec.description}\n\n`;
+      });
+    }
+
+    return response;
+  }
+
+  // Otherwise, format manually
+  let response = `## Team Coaching Recommendations\n`;
+  response += `*Based on ${callCount} calls from ${startDate} to ${endDate}*\n\n`;
+
+  if (teamInsights) {
+    response += `### Team Insights\n${teamInsights}\n\n`;
+  }
+
+  if (focusArea) {
+    response += `### 🎯 Primary Focus Area\n${focusArea}\n\n`;
+  }
+
+  if (recommendations && recommendations.length > 0) {
+    response += `### Recommendations\n\n`;
+    recommendations.forEach((rec, i) => {
+      const priorityEmoji = rec.priority === 'high' ? '🔴' : rec.priority === 'medium' ? '🟡' : '🟢';
+      response += `${i + 1}. ${priorityEmoji} **${rec.title}**\n   ${rec.description}\n\n`;
+    });
   }
 
   return response;

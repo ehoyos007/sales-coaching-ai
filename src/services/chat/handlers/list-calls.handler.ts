@@ -22,8 +22,58 @@ export async function handleListCalls(
       agentName = resolved.first_name;
     }
 
+    // Calculate date range
+    const { startDate, endDate } = params.startDate && params.endDate
+      ? { startDate: params.startDate, endDate: params.endDate }
+      : getDateRange(params.daysBack);
+
+    // Check if this is a duration-based filter query (Long Calls)
+    if (params.minDurationMinutes) {
+      const minDurationSeconds = params.minDurationMinutes * 60;
+      const calls = await callsService.getCallsByDuration(
+        minDurationSeconds,
+        startDate,
+        endDate,
+        params.limit || 50
+      );
+
+      return {
+        success: true,
+        data: {
+          type: 'call_list',
+          agent_name: null,
+          agent_user_id: null,
+          start_date: startDate,
+          end_date: endDate,
+          call_count: calls.length,
+          calls,
+          view_type: 'long_calls',
+          min_duration_minutes: params.minDurationMinutes,
+        },
+      };
+    }
+
+    // If no agent specified, fetch all recent calls (admin view)
     if (!agentId) {
-      return formatError(ErrorMessages.agentRequired());
+      const calls = await callsService.getRecentCalls(
+        startDate,
+        endDate,
+        params.limit || 50
+      );
+
+      return {
+        success: true,
+        data: {
+          type: 'call_list',
+          agent_name: null,
+          agent_user_id: null,
+          start_date: startDate,
+          end_date: endDate,
+          call_count: calls.length,
+          calls,
+          view_type: 'all_agents',
+        },
+      };
     }
 
     // Get agent details if we don't have the name
@@ -32,12 +82,7 @@ export async function handleListCalls(
       agentName = agent?.first_name || 'Unknown';
     }
 
-    // Calculate date range
-    const { startDate, endDate } = params.startDate && params.endDate
-      ? { startDate: params.startDate, endDate: params.endDate }
-      : getDateRange(params.daysBack);
-
-    // Fetch calls
+    // Fetch calls for specific agent
     const calls = await callsService.getAgentCalls(
       agentId,
       startDate,

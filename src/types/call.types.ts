@@ -26,7 +26,12 @@ export interface CallSummary {
   total_duration_formatted: string;
   total_turns: number;
   agent_talk_percentage: number;
+  customer_talk_percentage: number;
   is_inbound_call: boolean;
+  // Optional fields returned from call_metadata queries
+  agent_user_id?: string;
+  duration_seconds?: number;
+  total_duration_seconds?: number;
 }
 
 export interface CallTurn {

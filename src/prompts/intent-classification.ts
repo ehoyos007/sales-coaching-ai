@@ -5,12 +5,12 @@ Classify this user message and extract relevant parameters.
 User message: "{message}"
 
 Classify into ONE of these intents:
-- LIST_CALLS: User wants to see a list of calls (e.g., "show me calls", "Bradley's calls", "recent calls")
+- LIST_CALLS: User wants to see a list of calls (e.g., "show me calls", "Bradley's calls", "recent calls", "long calls", "calls over 10 minutes")
 - AGENT_STATS: User wants performance metrics for a specific agent (e.g., "how is Bradley doing", "performance summary for John")
 - TEAM_SUMMARY: User wants team-wide stats (e.g., "team performance", "how's the sales team doing", "overall stats")
 - GET_TRANSCRIPT: User wants to see a specific call transcript (references a call_id or asks to "show me the transcript")
-- SEARCH_CALLS: User wants to find calls by content (e.g., "find calls where customer objected", "search for calls about Medicare")
-- COACHING: User wants overall coaching feedback on a call (e.g., "coaching tips", "how could they improve", "rate this call")
+- SEARCH_CALLS: User wants to find calls by content or topic (e.g., "find calls where customer objected", "search for calls about Medicare")
+- COACHING: User wants overall coaching feedback (e.g., "coaching tips", "coaching recommendations", "how could they improve")
 - OBJECTION_ANALYSIS: User wants deep-dive analysis of objections in a call (e.g., "what objections came up", "how did they handle objections", "analyze objections in this call", "what pushback did the customer give")
 - GENERAL: General question, greeting, help request, or anything that doesn't fit above
 
@@ -19,6 +19,7 @@ Extract these parameters if present:
 - days_back: Time range in days. Default 7. Examples: "last week" = 7, "last month" = 30, "last 3 days" = 3, "today" = 1
 - call_id: Specific call ID if mentioned (null if none). Usually a long alphanumeric string.
 - search_query: What to search for if SEARCH_CALLS intent (null otherwise). The actual search term from the user's query.
+- min_duration_minutes: Minimum call duration filter if mentioned (null otherwise). Examples: "longer than 10 minutes" = 10, "over 5 mins" = 5, "calls over 15 minutes" = 15
 
 Important rules:
 1. If the user mentions a person's name, extract it as agent_name
@@ -26,6 +27,8 @@ Important rules:
 3. For TEAM_SUMMARY, don't require an agent_name
 4. For SEARCH_CALLS, extract the search content (what they want to find) as search_query
 5. Be generous with partial name matches - "Brad" should be captured as "Brad"
+6. For duration-based queries like "long calls" or "calls over X minutes", use LIST_CALLS with min_duration_minutes
+7. For COACHING without a specific call_id, this means aggregate coaching recommendations
 
 Respond ONLY with valid JSON (no markdown, no explanation):
 {
@@ -34,6 +37,7 @@ Respond ONLY with valid JSON (no markdown, no explanation):
   "days_back": 7,
   "call_id": null | "call-id-string",
   "search_query": null | "search query string",
+  "min_duration_minutes": null | number,
   "confidence": 0.0-1.0
 }`;
 

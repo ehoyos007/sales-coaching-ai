@@ -105,9 +105,65 @@ export async function getCallById(callId: string): Promise<CallMetadata | null> 
   return data;
 }
 
+/**
+ * Get recent calls across all agents within a date range
+ * For admin-level views without agent filtering
+ */
+export async function getRecentCalls(
+  startDate: string,
+  endDate: string,
+  limit: number = 50
+): Promise<CallSummary[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('call_metadata')
+    .select('*')
+    .gte('call_date', startDate)
+    .lte('call_date', endDate)
+    .order('call_date', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Failed to get recent calls: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+/**
+ * Get calls filtered by minimum duration (in seconds)
+ * For finding long calls across all agents
+ */
+export async function getCallsByDuration(
+  minDurationSeconds: number,
+  startDate: string,
+  endDate: string,
+  limit: number = 50
+): Promise<CallSummary[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('call_metadata')
+    .select('*')
+    .gte('call_date', startDate)
+    .lte('call_date', endDate)
+    .gte('duration_seconds', minDurationSeconds)
+    .order('duration_seconds', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Failed to get calls by duration: ${error.message}`);
+  }
+
+  return data || [];
+}
+
 export const callsService = {
   getAgentCalls,
   getAgentPerformance,
   getAgentDailyCalls,
   getCallById,
+  getRecentCalls,
+  getCallsByDuration,
 };

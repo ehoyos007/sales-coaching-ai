@@ -19,6 +19,7 @@ export async function classify(message: string): Promise<IntentClassification> {
       days_back: number;
       call_id: string | null;
       search_query: string | null;
+      min_duration_minutes: number | null;
       confidence: number;
     }>(CLASSIFICATION_SYSTEM_PROMPT, userPrompt, { maxTokens: 256 });
 
@@ -31,6 +32,7 @@ export async function classify(message: string): Promise<IntentClassification> {
       days_back: result.days_back || 7,
       call_id: result.call_id || null,
       search_query: result.search_query || null,
+      min_duration_minutes: result.min_duration_minutes || null,
       confidence: result.confidence || 0.5,
     };
   } catch (error) {
@@ -42,6 +44,7 @@ export async function classify(message: string): Promise<IntentClassification> {
       days_back: 7,
       call_id: null,
       search_query: null,
+      min_duration_minutes: null,
       confidence: 0.0,
     };
   }

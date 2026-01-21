@@ -1,5 +1,61 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 23
+
+### Summary
+Fixed Quick Action buttons on Admin Panel that were failing due to required parameters not being provided.
+
+### Completed
+- [x] Fixed **Recent Calls** — Now fetches calls across all agents without requiring agent filter
+- [x] Fixed **Long Calls** — Now filters by duration (10+ minutes) sorted by duration descending
+- [x] Fixed **Coaching Tips** — Now generates aggregate coaching recommendations from recent calls
+- [x] Added `getRecentCalls()` function to calls service for all-agents view
+- [x] Added `getCallsByDuration()` function for duration-based filtering
+- [x] Added `min_duration_minutes` parameter to intent classification
+- [x] Added `handleAggregateCoaching()` function for team-wide coaching tips
+- [x] Updated response formatter to handle new view types
+- [x] Verified both backend and frontend builds pass
+
+### Files Changed
+
+**Backend - Modified:**
+- `src/services/database/calls.service.ts` — Added `getRecentCalls()` and `getCallsByDuration()` functions
+- `src/services/chat/handlers/list-calls.handler.ts` — Handle no-agent filter and duration-based queries
+- `src/services/chat/handlers/coaching.handler.ts` — Added aggregate coaching when no callId provided
+- `src/prompts/intent-classification.ts` — Added `min_duration_minutes` extraction
+- `src/types/intent.types.ts` — Added `min_duration_minutes` to IntentClassification, `minDurationMinutes` to HandlerParams
+- `src/types/call.types.ts` — Extended CallSummary with optional fields
+- `src/services/ai/intent.service.ts` — Extract and pass duration parameter
+- `src/services/chat/chat.service.ts` — Pass `minDurationMinutes` to handlers
+- `src/services/chat/response.formatter.ts` — Added `formatAggregateCoaching()`, updated `formatCallList()` for new view types
+
+### Quick Action Behavior Changes
+
+| Button | Before | After |
+|--------|--------|-------|
+| Recent Calls | Required agent ID | Fetches all recent calls across agents |
+| Long Calls | Required search query | Filters by duration ≥10 min, sorted by duration |
+| Coaching Tips | Required call ID | Generates aggregate team coaching recommendations |
+
+### New Data Types
+
+**LIST_CALLS response now includes:**
+- `view_type: 'all_agents'` — When no agent specified
+- `view_type: 'long_calls'` — When duration filter applied
+- `min_duration_minutes` — The duration threshold used
+
+**COACHING response now includes:**
+- `type: 'aggregate_coaching'` — When no call ID specified
+- `team_insights` — Summary of observed patterns
+- `focus_area` — Primary area to focus on
+- `recommendations` — Prioritized coaching tips with title, description, priority
+
+### Next Steps
+- [ ] Test quick actions in production
+- [ ] Add more aggregate analysis features
+
+---
+
 ## 2026-01-21 — Session 22
 
 ### Summary

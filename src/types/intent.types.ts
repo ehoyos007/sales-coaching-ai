@@ -15,6 +15,7 @@ export interface IntentClassification {
   days_back: number;
   call_id: string | null;
   search_query: string | null;
+  min_duration_minutes: number | null;
   confidence: number;
 }
 
@@ -40,6 +41,7 @@ export interface HandlerParams {
   daysBack: number;
   callId?: string;
   searchQuery?: string;
+  minDurationMinutes?: number;
   department?: string;
   startDate?: string;
   endDate?: string;
