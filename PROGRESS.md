@@ -1,5 +1,54 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 27
+
+### Summary
+Fixed Admin Panel team management: added Delete Team feature and fixed agent-to-team assignment to use the correct `agents` table instead of `user_profiles`.
+
+### Completed
+- [x] **Issue 1: Delete Team** - Added full delete team functionality with confirmation dialog
+  - Backend: `deleteTeam` method in auth.service.ts, DELETE endpoint in admin.routes.ts
+  - Frontend: API function, handler in AdminPage, delete button with inline confirmation
+  - Behavior: Unassigns all team members before deleting
+- [x] **Issue 2: Invite User Button** - Investigated and confirmed intentional (placeholder for future feature)
+- [x] **Issue 3: Agent-to-Team Assignment** - Fixed to use correct data source
+  - Created migration to add `team_id` column to `agents` table
+  - Updated Agent types (backend + frontend) to include `team_id`
+  - Added backend service methods: `updateAgentTeam`, `getAgentsByTeam`, `getUnassignedAgents`
+  - Added admin routes: `GET /admin/agents`, `PUT /admin/agents/:agentUserId/team`
+  - Updated AdminPage to fetch agents and pass to TeamList
+  - Updated TeamList to use agents from `agents` table instead of `user_profiles`
+  - Applied migration to Supabase production
+
+### Files Created
+- `supabase/migrations/20260121000000_add_team_id_to_agents.sql` — Adds team_id to agents table
+
+### Files Modified
+- `src/services/auth/auth.service.ts` — Added deleteTeam method
+- `src/routes/admin.routes.ts` — Added DELETE /admin/teams/:teamId, GET /admin/agents, PUT /admin/agents/:agentUserId/team
+- `src/services/database/agents.service.ts` — Added agent team assignment methods
+- `src/types/agent.types.ts` — Added team_id to Agent type
+- `client/src/types/index.ts` — Added team_id to Agent type
+- `client/src/services/api.ts` — Added deleteTeam, getAdminAgents, updateAgentTeam
+- `client/src/pages/Admin/AdminPage.tsx` — Added agents state, handlers for delete and agent assignment
+- `client/src/pages/Admin/components/TeamList.tsx` — Delete button, uses agents table for team members
+
+### Key Clarification
+| Table | Purpose |
+|-------|---------|
+| `user_profiles` | App users (admins, managers who log in) |
+| `agents` | Sales agents whose calls are recorded and analyzed |
+
+Team management now correctly assigns **sales agents** to teams.
+
+### Git Activity
+```
+8b170fd feat(admin): add delete team functionality to admin panel
+c68b1fe fix(admin): use agents table for team assignment instead of user_profiles
+```
+
+---
+
 ## 2026-01-21 — Session 26
 
 ### Summary

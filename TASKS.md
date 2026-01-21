@@ -43,6 +43,15 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 27 (2026-01-21)
+- [x] Fixed Admin Panel team management issues
+  - Added Delete Team button with confirmation dialog to edit modal
+  - Investigated Invite User button (intentional placeholder for future feature)
+  - Fixed agent-to-team assignment to use `agents` table instead of `user_profiles`
+  - Created migration to add `team_id` column to agents table
+  - Added backend endpoints: GET /admin/agents, PUT /admin/agents/:agentUserId/team
+  - Updated TeamList to display and manage sales agents from agents table
+
 ### Session 26 (2026-01-21)
 - [x] Enhanced objection analysis with verbatim snippets and pattern tracking
   - Created `agent_objection_stats` and `objection_occurrences` database tables
