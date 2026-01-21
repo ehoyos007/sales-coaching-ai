@@ -19,9 +19,7 @@ Preparing for deployment and adding polish features
 
 ### Medium Priority
 
-- [ ] **Add Loading States to Sidebar**
-  - Description: Show skeleton loaders while agents are loading
-  - Files: `client/src/components/Sidebar/AgentList.tsx`
+*No medium priority tasks at this time*
 
 ### Low Priority / Backlog
 
@@ -44,6 +42,15 @@ Preparing for deployment and adding polish features
 ---
 
 ## ✅ Done
+
+### Session 22 (2026-01-21)
+- [x] Added loading states throughout the application
+  - UserMenu: Sign out button shows spinner and "Signing out..." text
+  - QuickActions: Buttons disabled during chat loading
+  - VersionHistory: Restore button shows "Restoring..." with spinner
+  - RubricSettings: Create draft modal shows loading state
+  - AgentList: Agent selection buttons disabled during chat loading
+  - All buttons have proper `disabled` and `aria-busy` attributes for accessibility
 
 ### Session 21 (2026-01-21)
 - [x] Improved error messages across all chat handlers
@@ -188,4 +195,4 @@ Preparing for deployment and adding polish features
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 21)
+**Last Updated:** 2026-01-21 (Session 22)

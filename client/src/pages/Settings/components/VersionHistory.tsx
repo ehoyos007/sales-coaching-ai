@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { LoadingSpinner } from '../../../components/common/LoadingSpinner';
 import type { RubricVersionSummary } from '../../../types';
 
 interface VersionHistoryProps {
@@ -12,6 +13,17 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
   activeVersionId,
   onRestoreVersion,
 }) => {
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+
+  const handleRestore = async (id: string) => {
+    if (restoringId) return;
+    setRestoringId(id);
+    try {
+      await onRestoreVersion(id);
+    } finally {
+      setRestoringId(null);
+    }
+  };
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -102,13 +114,24 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
                   <div className="flex items-center gap-2">
                     {!isActive && !version.is_draft && (
                       <button
-                        onClick={() => onRestoreVersion(version.id)}
-                        className="px-3 py-1.5 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors flex items-center gap-1"
+                        onClick={() => handleRestore(version.id)}
+                        disabled={restoringId !== null}
+                        className="px-3 py-1.5 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-busy={restoringId === version.id}
                       >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Restore
+                        {restoringId === version.id ? (
+                          <>
+                            <LoadingSpinner size="sm" />
+                            Restoring...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Restore
+                          </>
+                        )}
                       </button>
                     )}
                   </div>

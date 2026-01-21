@@ -1,5 +1,42 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 22
+
+### Summary
+Added loading states throughout the application for user actions involving async operations.
+
+### Completed
+- [x] UserMenu sign out button: Shows spinner + "Signing out..." text, prevents double-clicks
+- [x] QuickActions buttons: Disabled while chat is loading
+- [x] VersionHistory restore button: Shows spinner + "Restoring...", disabled during operation
+- [x] RubricSettings create draft modal: Shows spinner + "Creating...", form disabled during save
+- [x] AgentList selection buttons: Disabled while chat is loading
+- [x] All interactive elements have proper `aria-busy` attributes for accessibility
+- [x] Updated TASKS.md with completion notes
+
+### Files Changed
+- `client/src/components/UserMenu/UserMenu.tsx` — Added `isSigningOut` state, loading spinner, disabled button
+- `client/src/components/Sidebar/QuickActions.tsx` — Added `isLoading` prop, disabled styling
+- `client/src/components/Sidebar/AgentList.tsx` — Added `isChatLoading` prop, disabled styling
+- `client/src/components/Sidebar/Sidebar.tsx` — Pass `isChatLoading` to children components
+- `client/src/pages/Settings/components/VersionHistory.tsx` — Added `restoringId` state, loading UI
+- `client/src/pages/Settings/RubricSettings.tsx` — Added loading state to create draft modal
+- `client/src/App.tsx` — Pass `isLoading` to Sidebar via `isChatLoading` prop
+
+### Patterns Used
+- Local loading state for single-action buttons (e.g., `isSigningOut`, `restoringId`)
+- Passed loading state from hooks for UI-wide states (e.g., `isChatLoading` from useChat)
+- Consistent disabled styling: `disabled:opacity-50 disabled:cursor-not-allowed`
+- Accessibility: `aria-busy` attribute on interactive elements
+- Used existing `LoadingSpinner` component for consistency
+
+### Next Steps
+- [ ] Set up CI/CD pipeline
+- [ ] Add health check endpoint monitoring
+- [ ] Performance testing
+
+---
+
 ## 2026-01-21 — Session 21
 
 ### Summary

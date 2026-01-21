@@ -9,6 +9,7 @@ interface QuickAction {
 
 interface QuickActionsProps {
   onActionClick: (prompt: string) => void;
+  isLoading?: boolean;
 }
 
 const quickActions: QuickAction[] = [
@@ -92,7 +93,7 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ onActionClick }) => {
+export const QuickActions: React.FC<QuickActionsProps> = ({ onActionClick, isLoading = false }) => {
   return (
     <div className="space-y-1">
       <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
@@ -102,7 +103,9 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onActionClick }) => 
         <button
           key={action.id}
           onClick={() => onActionClick(action.prompt)}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-smooth"
+          disabled={isLoading}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-600"
+          aria-busy={isLoading}
         >
           <div className="flex-shrink-0 h-7 w-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
             <svg

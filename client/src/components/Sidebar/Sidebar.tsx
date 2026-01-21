@@ -10,6 +10,7 @@ interface SidebarProps {
   agentsError: string | null;
   selectedAgentId?: string;
   isOpen: boolean;
+  isChatLoading?: boolean;
   onClose: () => void;
   onAgentSelect: (agent: Agent) => void;
   onQuickAction: (prompt: string) => void;
@@ -23,6 +24,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   agentsError,
   selectedAgentId,
   isOpen,
+  isChatLoading = false,
   onClose,
   onAgentSelect,
   onQuickAction,
@@ -115,13 +117,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Content */}
         <div className="flex-1 overflow-y-auto py-4">
           {activeTab === 'actions' ? (
-            <QuickActions onActionClick={onQuickAction} />
+            <QuickActions onActionClick={onQuickAction} isLoading={isChatLoading} />
           ) : (
             <AgentList
               agents={agents}
               isLoading={isLoadingAgents}
               error={agentsError}
               selectedAgentId={selectedAgentId}
+              isChatLoading={isChatLoading}
               onAgentSelect={onAgentSelect}
             />
           )}

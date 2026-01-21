@@ -7,6 +7,7 @@ interface AgentListProps {
   isLoading: boolean;
   error: string | null;
   selectedAgentId?: string;
+  isChatLoading?: boolean;
   onAgentSelect: (agent: Agent) => void;
 }
 
@@ -15,6 +16,7 @@ export const AgentList: React.FC<AgentListProps> = ({
   isLoading,
   error,
   selectedAgentId,
+  isChatLoading = false,
   onAgentSelect,
 }) => {
   if (isLoading) {
@@ -73,11 +75,13 @@ export const AgentList: React.FC<AgentListProps> = ({
               <button
                 key={agent.agent_user_id}
                 onClick={() => onAgentSelect(agent)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-smooth ${
+                disabled={isChatLoading}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-smooth disabled:opacity-50 disabled:cursor-not-allowed ${
                   selectedAgentId === agent.agent_user_id
                     ? 'bg-primary-100 text-primary-700'
-                    : 'hover:bg-slate-100 text-slate-700'
+                    : 'hover:bg-slate-100 text-slate-700 disabled:hover:bg-transparent'
                 }`}
+                aria-busy={isChatLoading}
               >
                 <div
                   className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${

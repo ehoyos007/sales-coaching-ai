@@ -115,6 +115,7 @@ const ChatPage: React.FC = () => {
         agentsError={agentsError}
         selectedAgentId={selectedAgentId}
         isOpen={isSidebarOpen}
+        isChatLoading={isLoading}
         onClose={() => setIsSidebarOpen(false)}
         onAgentSelect={handleAgentSelect}
         onQuickAction={handleQuickAction}

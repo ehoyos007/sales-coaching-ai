@@ -258,7 +258,8 @@ export const RubricSettings: React.FC = () => {
               value={newDraftName}
               onChange={e => setNewDraftName(e.target.value)}
               placeholder="Version name (e.g., Q1 2026 Updates)"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-4"
+              disabled={isSaving}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-4 disabled:bg-slate-100 disabled:cursor-not-allowed"
             />
             <div className="flex justify-end gap-3">
               <button
@@ -266,16 +267,25 @@ export const RubricSettings: React.FC = () => {
                   setShowCreateModal(false);
                   setNewDraftName('');
                 }}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                disabled={isSaving}
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateDraft}
-                disabled={!newDraftName.trim()}
-                className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50"
+                disabled={!newDraftName.trim() || isSaving}
+                className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                aria-busy={isSaving}
               >
-                Create Draft
+                {isSaving ? (
+                  <>
+                    <LoadingSpinner size="sm" className="text-white" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Draft'
+                )}
               </button>
             </div>
           </div>
