@@ -21,6 +21,13 @@ import type {
   UserProfile,
   UserRole,
   Team,
+  ScriptsByProductType,
+  ScriptWithSyncStatus,
+  SalesScript,
+  ProductType,
+  RubricSyncLog,
+  SyncAnalysisResponse,
+  ApplySyncInput,
 } from '../types';
 
 // Use environment variable for API URL, fallback to relative path for dev proxy
@@ -361,6 +368,103 @@ export async function updateTeam(
   return request<ApiResponse<{ team: Team }>>(`/admin/teams/${teamId}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
+  });
+}
+
+// Sales Scripts API
+export async function getScripts(): Promise<ApiResponse<ScriptsByProductType>> {
+  return request<ApiResponse<ScriptsByProductType>>('/scripts');
+}
+
+export async function getScriptById(id: string): Promise<ApiResponse<ScriptWithSyncStatus>> {
+  return request<ApiResponse<ScriptWithSyncStatus>>(`/scripts/${id}`);
+}
+
+export async function uploadScript(
+  file: File,
+  name: string,
+  productType: ProductType,
+  versionNotes?: string
+): Promise<ApiResponse<SalesScript>> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('name', name);
+  formData.append('product_type', productType);
+  if (versionNotes) {
+    formData.append('version_notes', versionNotes);
+  }
+
+  const url = `${API_BASE_URL}/scripts`;
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || `HTTP error ${response.status}`,
+      response.status,
+      data
+    );
+  }
+
+  return data;
+}
+
+export async function updateScript(
+  id: string,
+  updates: { name?: string; version_notes?: string }
+): Promise<ApiResponse<SalesScript>> {
+  return request<ApiResponse<SalesScript>>(`/scripts/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deleteScript(id: string): Promise<ApiResponse<{ message: string }>> {
+  return request<ApiResponse<{ message: string }>>(`/scripts/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function activateScript(id: string): Promise<ApiResponse<SalesScript>> {
+  return request<ApiResponse<SalesScript>>(`/scripts/${id}/activate`, {
+    method: 'POST',
+  });
+}
+
+export async function startScriptSync(scriptId: string): Promise<ApiResponse<SyncAnalysisResponse>> {
+  return request<ApiResponse<SyncAnalysisResponse>>(`/scripts/${scriptId}/sync`, {
+    method: 'POST',
+  });
+}
+
+export async function getSyncStatus(syncLogId: string): Promise<ApiResponse<RubricSyncLog>> {
+  return request<ApiResponse<RubricSyncLog>>(`/scripts/sync/${syncLogId}`);
+}
+
+export async function applySyncChanges(
+  syncLogId: string,
+  approvedChanges: ApplySyncInput
+): Promise<ApiResponse<RubricConfigWithRelations>> {
+  return request<ApiResponse<RubricConfigWithRelations>>(`/scripts/sync/${syncLogId}/apply`, {
+    method: 'POST',
+    body: JSON.stringify(approvedChanges),
+  });
+}
+
+export async function rejectSync(syncLogId: string): Promise<ApiResponse<RubricSyncLog>> {
+  return request<ApiResponse<RubricSyncLog>>(`/scripts/sync/${syncLogId}/reject`, {
+    method: 'POST',
   });
 }
 

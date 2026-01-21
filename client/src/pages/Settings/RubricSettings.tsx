@@ -6,9 +6,10 @@ import { ScoringCriteriaEditor } from './components/ScoringCriteriaEditor';
 import { RedFlagsEditor } from './components/RedFlagsEditor';
 import { VersionHistory } from './components/VersionHistory';
 import { WeightDistributionBar } from './components/WeightDistributionBar';
+import { ScriptsManager } from './components/ScriptsManager';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
-type TabId = 'categories' | 'criteria' | 'flags' | 'history';
+type TabId = 'categories' | 'criteria' | 'flags' | 'scripts' | 'history';
 
 export const RubricSettings: React.FC = () => {
   const {
@@ -22,6 +23,7 @@ export const RubricSettings: React.FC = () => {
     weightValidation,
     localDraft,
     hasUnsavedChanges,
+    fetchActiveConfig,
     createDraft,
     saveDraft,
     activateDraft,
@@ -188,6 +190,7 @@ export const RubricSettings: React.FC = () => {
               { id: 'categories', label: 'Category Weights' },
               { id: 'criteria', label: 'Scoring Criteria' },
               { id: 'flags', label: 'Red Flags' },
+              { id: 'scripts', label: 'Sales Scripts' },
               { id: 'history', label: 'Version History' },
             ] as const).map(tab => (
               <button
@@ -233,6 +236,9 @@ export const RubricSettings: React.FC = () => {
                 onRemoveRedFlag={removeLocalRedFlag}
                 isEditable={!!draftConfig}
               />
+            )}
+            {activeTab === 'scripts' && (
+              <ScriptsManager onRubricUpdated={fetchActiveConfig} />
             )}
             {activeTab === 'history' && (
               <VersionHistory

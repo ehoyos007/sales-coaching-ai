@@ -370,3 +370,126 @@ export type {
   SignUpResponse,
   MeResponse,
 } from './auth.types';
+
+// Sales Scripts types
+export type ProductType = 'aca' | 'limited_medical' | 'life_insurance';
+export type SyncStatus = 'pending' | 'analyzing' | 'pending_approval' | 'applied' | 'rejected';
+export type ScriptFileType =
+  | 'text/plain'
+  | 'application/pdf'
+  | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  | 'text/markdown';
+
+export interface SalesScript {
+  id: string;
+  name: string;
+  product_type: ProductType;
+  version: number;
+  content: string;
+  file_url: string | null;
+  file_name: string | null;
+  file_size_bytes: number | null;
+  file_type: ScriptFileType | null;
+  version_notes: string | null;
+  is_active: boolean;
+  uploaded_by: string | null;
+  linked_rubric_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RubricSyncLog {
+  id: string;
+  script_id: string;
+  rubric_config_id: string;
+  status: SyncStatus;
+  changes_proposed: ProposedChanges | null;
+  changes_approved: ProposedChanges | null;
+  changes_rejected: ProposedChanges | null;
+  error_message: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  applied_at: string | null;
+  created_at: string;
+}
+
+export interface ScriptWithSyncStatus extends SalesScript {
+  latest_sync?: RubricSyncLog;
+  rubric_aligned: boolean;
+}
+
+export interface ScriptsByProductType {
+  aca: ScriptWithSyncStatus[];
+  limited_medical: ScriptWithSyncStatus[];
+  life_insurance: ScriptWithSyncStatus[];
+}
+
+export interface ProposedCategoryChange {
+  change_type: 'add' | 'modify' | 'remove';
+  category_slug: string;
+  current_name?: string;
+  proposed_name?: string;
+  current_weight?: number;
+  proposed_weight?: number;
+  current_description?: string;
+  proposed_description?: string;
+  reason: string;
+  confidence: number;
+  script_reference?: string;
+}
+
+export interface ProposedCriteriaChange {
+  change_type: 'add' | 'modify' | 'remove';
+  category_slug: string;
+  score: number;
+  current_text?: string;
+  proposed_text?: string;
+  reason: string;
+  confidence: number;
+  script_reference?: string;
+}
+
+export interface ProposedRedFlagChange {
+  change_type: 'add' | 'modify' | 'remove';
+  flag_key: string;
+  current_display_name?: string;
+  proposed_display_name?: string;
+  current_description?: string;
+  proposed_description?: string;
+  current_severity?: string;
+  proposed_severity?: string;
+  reason: string;
+  confidence: number;
+  script_reference?: string;
+}
+
+export interface ProposedChanges {
+  summary: string;
+  analysis_notes: string;
+  category_changes: ProposedCategoryChange[];
+  criteria_changes: ProposedCriteriaChange[];
+  red_flag_changes: ProposedRedFlagChange[];
+  total_changes: number;
+  high_confidence_count: number;
+}
+
+export interface ApplySyncInput {
+  approved_category_changes: string[];
+  approved_criteria_changes: string[];
+  approved_red_flag_changes: string[];
+}
+
+export interface SyncAnalysisResponse {
+  sync_log_id: string;
+  status: SyncStatus;
+  proposed_changes: ProposedChanges | null;
+  error_message: string | null;
+}
+
+export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  aca: 'ACA (Affordable Care Act)',
+  limited_medical: 'Limited Medical',
+  life_insurance: 'Life Insurance',
+};
+
+export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;

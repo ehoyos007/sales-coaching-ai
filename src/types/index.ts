@@ -4,3 +4,5 @@ export * from './chat.types.js';
 export * from './intent.types.js';
 export * from './session.types.js';
 export * from './rubric.types.js';
+export * from './scripts.types.js';
+export * from './objection.types.js';

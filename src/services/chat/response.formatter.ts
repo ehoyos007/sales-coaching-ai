@@ -420,6 +420,15 @@ function formatAggregateCoaching(data: Record<string, unknown>): string {
   return response;
 }
 
+/**
+ * Snippet interface for enhanced objection analysis
+ */
+interface ObjectionSnippet {
+  objection_text: string;
+  rebuttal_text: string;
+  full_exchange?: string;
+}
+
 function formatObjectionAnalysis(data: Record<string, unknown>): string {
   // If we have a pre-generated summary from Claude, use it
   if (data.summary) {
@@ -434,9 +443,11 @@ function formatObjectionAnalysis(data: Record<string, unknown>): string {
     objections_found: Array<{
       objection_type: string;
       objection_text: string;
+      agent_response?: string;
       response_quality: number;
       was_resolved: boolean;
       improvement_suggestion: string;
+      snippet?: ObjectionSnippet;
     }>;
     overall_score: number | null;
     total_objections: number;
@@ -474,7 +485,7 @@ function formatObjectionAnalysis(data: Record<string, unknown>): string {
     response += `| Handling Score | ${analysis.overall_score}/5 ${scoreEmoji} |\n`;
   }
 
-  // Objections breakdown
+  // Objections breakdown with enhanced snippet display
   if (analysis.objections_found.length > 0) {
     response += `\n### Objections Found\n\n`;
 
@@ -482,13 +493,30 @@ function formatObjectionAnalysis(data: Record<string, unknown>): string {
       const resolvedEmoji = obj.was_resolved ? '✅' : '❌';
       const qualityEmoji = obj.response_quality >= 4 ? '⭐' : obj.response_quality >= 3 ? '✓' : '⚠️';
 
-      response += `**${i + 1}. ${capitalize(obj.objection_type)}** ${resolvedEmoji}\n`;
-      response += `> "${obj.objection_text}"\n\n`;
-      response += `- Response Quality: ${obj.response_quality}/5 ${qualityEmoji}\n`;
-      if (obj.improvement_suggestion) {
-        response += `- 💡 ${obj.improvement_suggestion}\n`;
+      response += `**Objection #${i + 1}: ${capitalize(obj.objection_type)}** ${resolvedEmoji}\n\n`;
+
+      // Display verbatim snippets if available (new enhanced format)
+      if (obj.snippet?.objection_text && obj.snippet?.rebuttal_text) {
+        response += `> **Customer:** "${obj.snippet.objection_text}"\n\n`;
+        response += `> **Agent:** "${obj.snippet.rebuttal_text}"\n\n`;
+      } else {
+        // Fallback to legacy format
+        response += `> **Customer:** "${obj.objection_text}"\n\n`;
+        if (obj.agent_response) {
+          response += `> **Agent:** "${obj.agent_response}"\n\n`;
+        }
       }
-      response += `\n`;
+
+      response += `**Score:** ${obj.response_quality}/5 ${qualityEmoji}`;
+      if (obj.improvement_suggestion) {
+        response += ` - ${obj.improvement_suggestion}`;
+      }
+      response += `\n\n`;
+
+      // Add separator between objections (except for the last one)
+      if (i < analysis.objections_found.length - 1) {
+        response += `---\n\n`;
+      }
     });
   }
 
