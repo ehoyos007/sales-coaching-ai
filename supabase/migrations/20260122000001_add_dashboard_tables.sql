@@ -176,6 +176,7 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- RPC Function: get_agent_overview_metrics
 -- Returns metrics for a single agent
+-- Fixed: Separated team_comparison calculation to avoid mixing aggregates with window functions
 -- ============================================================================
 CREATE OR REPLACE FUNCTION get_agent_overview_metrics(
   p_agent_user_id TEXT,
@@ -188,6 +189,7 @@ DECLARE
   v_prev_start DATE;
   v_prev_end DATE;
   v_team_id UUID;
+  v_team_comparison JSON;
 BEGIN
   -- Calculate previous period for comparison
   v_prev_start := p_start_date - (p_end_date - p_start_date + 1);
@@ -195,6 +197,53 @@ BEGIN
 
   -- Get agent's team
   SELECT team_id INTO v_team_id FROM agents WHERE agent_user_id::text = p_agent_user_id;
+
+  -- Calculate team comparison separately to avoid mixing aggregates with window functions
+  IF v_team_id IS NOT NULL THEN
+    WITH agent_stats AS (
+      SELECT
+        a.agent_user_id,
+        COUNT(cm.call_id) as call_count,
+        COALESCE(AVG(cm.total_duration_seconds), 0) as avg_duration,
+        COALESCE(AVG(cm.agent_talk_percentage), 0) as avg_talk_ratio,
+        COALESCE((SELECT AVG(cs.overall_score) FROM compliance_scores cs
+         WHERE cs.agent_user_id = a.agent_user_id::text
+           AND cs.analyzed_at >= p_start_date
+           AND cs.analyzed_at <= p_end_date + INTERVAL '1 day'), 0) as avg_compliance
+      FROM agents a
+      LEFT JOIN call_metadata cm ON cm.agent_user_id = a.agent_user_id::text
+        AND cm.call_date >= p_start_date
+        AND cm.call_date <= p_end_date
+      WHERE a.team_id = v_team_id
+      GROUP BY a.agent_user_id
+    ),
+    team_averages AS (
+      SELECT
+        AVG(call_count) as team_avg_calls,
+        AVG(avg_duration) as team_avg_duration,
+        AVG(avg_talk_ratio) as team_avg_talk_ratio,
+        AVG(avg_compliance) as team_avg_compliance
+      FROM agent_stats
+    ),
+    agent_percentiles AS (
+      SELECT
+        agent_user_id,
+        PERCENT_RANK() OVER (ORDER BY call_count) as percentile_calls,
+        PERCENT_RANK() OVER (ORDER BY avg_compliance) as percentile_compliance
+      FROM agent_stats
+    )
+    SELECT json_build_object(
+      'team_avg_calls', COALESCE(ta.team_avg_calls, 0),
+      'team_avg_duration', COALESCE(ta.team_avg_duration, 0),
+      'team_avg_talk_ratio', COALESCE(ta.team_avg_talk_ratio, 0),
+      'team_avg_compliance', COALESCE(ta.team_avg_compliance, 0),
+      'agent_percentile_calls', COALESCE(ap.percentile_calls, 0),
+      'agent_percentile_compliance', COALESCE(ap.percentile_compliance, 0)
+    ) INTO v_team_comparison
+    FROM team_averages ta
+    CROSS JOIN agent_percentiles ap
+    WHERE ap.agent_user_id::text = p_agent_user_id;
+  END IF;
 
   SELECT json_build_object(
     'agent_user_id', p_agent_user_id,
@@ -256,36 +305,7 @@ BEGIN
         AND cm.call_date >= v_prev_start
         AND cm.call_date <= v_prev_end
     ),
-    'team_comparison', (
-      CASE WHEN v_team_id IS NOT NULL THEN (
-        SELECT json_build_object(
-          'team_avg_calls', COALESCE(AVG(agent_calls.call_count), 0),
-          'team_avg_duration', COALESCE(AVG(agent_calls.avg_duration), 0),
-          'team_avg_talk_ratio', COALESCE(AVG(agent_calls.avg_talk_ratio), 0),
-          'team_avg_compliance', COALESCE(AVG(agent_calls.avg_compliance), 0),
-          'agent_percentile_calls', PERCENT_RANK() OVER (ORDER BY agent_calls.call_count),
-          'agent_percentile_compliance', PERCENT_RANK() OVER (ORDER BY agent_calls.avg_compliance)
-        )
-        FROM (
-          SELECT
-            a.agent_user_id,
-            COUNT(cm.call_id) as call_count,
-            AVG(cm.total_duration_seconds) as avg_duration,
-            AVG(cm.agent_talk_percentage) as avg_talk_ratio,
-            (SELECT AVG(cs.overall_score) FROM compliance_scores cs
-             WHERE cs.agent_user_id = a.agent_user_id::text
-               AND cs.analyzed_at >= p_start_date
-               AND cs.analyzed_at <= p_end_date + INTERVAL '1 day') as avg_compliance
-          FROM agents a
-          LEFT JOIN call_metadata cm ON cm.agent_user_id = a.agent_user_id::text
-            AND cm.call_date >= p_start_date
-            AND cm.call_date <= p_end_date
-          WHERE a.team_id = v_team_id
-          GROUP BY a.agent_user_id
-        ) agent_calls
-        WHERE agent_calls.agent_user_id::text = p_agent_user_id
-      ) ELSE NULL END
-    )
+    'team_comparison', v_team_comparison
   ) INTO v_result;
 
   RETURN v_result;
