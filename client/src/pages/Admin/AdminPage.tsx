@@ -9,6 +9,7 @@ import {
   updateUserTeam,
   createTeam,
   updateTeam,
+  deleteTeam,
 } from '../../services/api';
 import type { UserProfile, UserRole, Team } from '../../types';
 
@@ -24,6 +25,7 @@ export const AdminPage: React.FC = () => {
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
   const [isUpdatingTeam, setIsUpdatingTeam] = useState(false);
+  const [isDeletingTeam, setIsDeletingTeam] = useState(false);
 
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -178,6 +180,36 @@ export const AdminPage: React.FC = () => {
         setError(err instanceof Error ? err.message : 'Failed to update team');
       } finally {
         setIsUpdatingTeam(false);
+      }
+    },
+    []
+  );
+
+  // Handle team deletion
+  const handleDeleteTeam = useCallback(
+    async (teamId: string) => {
+      setIsDeletingTeam(true);
+      setError(null);
+
+      try {
+        const response = await deleteTeam(teamId);
+
+        if (response.success) {
+          // Remove the team from local state
+          setTeams(prevTeams => prevTeams.filter(team => team.id !== teamId));
+
+          // Refresh users to update their team assignments
+          const usersResponse = await getAdminUsers();
+          if (usersResponse.success && usersResponse.data) {
+            setUsers(usersResponse.data.users);
+          }
+        } else {
+          throw new Error(response.error || 'Failed to delete team');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete team');
+      } finally {
+        setIsDeletingTeam(false);
       }
     },
     []
@@ -352,8 +384,10 @@ export const AdminPage: React.FC = () => {
               onCreateTeam={handleCreateTeam}
               onUpdateTeam={handleUpdateTeamDetails}
               onUpdateMember={handleUpdateTeam}
+              onDeleteTeam={handleDeleteTeam}
               isCreating={isCreatingTeam}
               isUpdating={isUpdatingTeam}
+              isDeleting={isDeletingTeam}
             />
           )}
         </div>

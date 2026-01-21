@@ -279,6 +279,38 @@ router.put('/teams/:teamId', async (req: Request, res: Response) => {
 });
 
 // =============================================
+// DELETE /admin/teams/:teamId - Delete a team
+// =============================================
+router.delete('/teams/:teamId', async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.params;
+
+    const result = await authService.deleteTeam(req.user!.id, teamId);
+
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+      });
+      return;
+    }
+
+    console.log(`[admin.routes] Team deleted: ${teamId} (by ${req.user?.email})`);
+
+    res.json({
+      success: true,
+      message: 'Team deleted successfully',
+    });
+  } catch (error) {
+    console.error('[admin.routes] Delete team error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete team',
+    });
+  }
+});
+
+// =============================================
 // GET /admin/teams/:teamId/members - Get team members
 // =============================================
 router.get('/teams/:teamId/members', async (req: Request, res: Response) => {

@@ -8,8 +8,10 @@ interface TeamListProps {
   onCreateTeam: (name: string, description?: string, managerId?: string) => Promise<void>;
   onUpdateTeam: (teamId: string, updates: { name?: string; description?: string; manager_id?: string | null }) => Promise<void>;
   onUpdateMember: (userId: string, teamId: string | null) => Promise<void>;
+  onDeleteTeam: (teamId: string) => Promise<void>;
   isCreating: boolean;
   isUpdating: boolean;
+  isDeleting: boolean;
 }
 
 // Helper to get manager display name
@@ -30,8 +32,10 @@ export const TeamList: React.FC<TeamListProps> = ({
   onCreateTeam,
   onUpdateTeam,
   onUpdateMember,
+  onDeleteTeam,
   isCreating,
   isUpdating,
+  isDeleting,
 }) => {
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -47,6 +51,9 @@ export const TeamList: React.FC<TeamListProps> = ({
 
   // Member management state
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
+
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -122,6 +129,22 @@ export const TeamList: React.FC<TeamListProps> = ({
 
   const handleCancelEdit = () => {
     setEditingTeam(null);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!editingTeam) return;
+    await onDeleteTeam(editingTeam.id);
+    setEditingTeam(null);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -599,21 +622,53 @@ export const TeamList: React.FC<TeamListProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
-              <button
-                onClick={handleCancelEdit}
-                disabled={isUpdating}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                disabled={isUpdating || !editName.trim()}
-                className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {isUpdating ? 'Saving...' : 'Save Changes'}
-              </button>
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+              {/* Delete button on the left */}
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={handleDeleteClick}
+                  disabled={isUpdating || isDeleting}
+                  className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 border border-red-200 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Delete Team
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-red-600">Delete this team?</span>
+                  <button
+                    onClick={handleConfirmDelete}
+                    disabled={isDeleting}
+                    className="px-3 py-1.5 text-sm bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                  </button>
+                  <button
+                    onClick={handleCancelDelete}
+                    disabled={isDeleting}
+                    className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Save/Cancel on the right */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCancelEdit}
+                  disabled={isUpdating || isDeleting}
+                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={isUpdating || isDeleting || !editName.trim()}
+                  className="px-4 py-2 text-sm bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

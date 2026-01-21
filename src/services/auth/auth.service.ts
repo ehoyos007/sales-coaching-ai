@@ -378,6 +378,51 @@ export class AuthService {
       : { success: true, team: data as Team };
   }
 
+  async deleteTeam(
+    adminUserId: string,
+    teamId: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const adminProfile = await this.getUserProfile(adminUserId);
+    if (!adminProfile || adminProfile.role !== 'admin') {
+      return { success: false, error: 'Only admin can delete teams' };
+    }
+
+    // Verify team exists
+    const { data: existingTeam, error: fetchError } = await this.dbClient
+      .from('teams')
+      .select('*')
+      .eq('id', teamId)
+      .single();
+
+    if (fetchError || !existingTeam) {
+      return { success: false, error: 'Team not found' };
+    }
+
+    // Unassign all members from this team (set team_id to null)
+    const { error: unassignError } = await this.dbClient
+      .from('user_profiles')
+      .update({ team_id: null, updated_at: new Date().toISOString() })
+      .eq('team_id', teamId);
+
+    if (unassignError) {
+      console.error('[auth.service] Error unassigning team members:', unassignError);
+      return { success: false, error: 'Failed to unassign team members' };
+    }
+
+    // Delete the team
+    const { error: deleteError } = await this.dbClient
+      .from('teams')
+      .delete()
+      .eq('id', teamId);
+
+    if (deleteError) {
+      console.error('[auth.service] Error deleting team:', deleteError);
+      return { success: false, error: 'Failed to delete team' };
+    }
+
+    return { success: true };
+  }
+
   async getAllTeams(): Promise<Team[]> {
     // Get teams with member count
     const { data: teams, error } = await this.dbClient

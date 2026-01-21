@@ -371,6 +371,12 @@ export async function updateTeam(
   });
 }
 
+export async function deleteTeam(teamId: string): Promise<ApiResponse<void>> {
+  return request<ApiResponse<void>>(`/admin/teams/${teamId}`, {
+    method: 'DELETE',
+  });
+}
+
 // Sales Scripts API
 export async function getScripts(): Promise<ApiResponse<ScriptsByProductType>> {
   return request<ApiResponse<ScriptsByProductType>>('/scripts');
