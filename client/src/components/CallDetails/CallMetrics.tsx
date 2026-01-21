@@ -131,7 +131,9 @@ export const CallMetrics: React.FC<CallMetricsProps> = ({ callDetails }) => {
               hour: 'numeric',
               minute: '2-digit',
               hour12: true,
-            })}
+              timeZone: 'America/New_York',
+            })}{' '}
+            EST
           </div>
           {callDetails.department && (
             <div className="text-sm text-slate-600">

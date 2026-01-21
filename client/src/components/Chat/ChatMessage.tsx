@@ -66,11 +66,20 @@ const CallDataCard: React.FC<{
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-800 group-hover:text-primary-700">
-                  {new Date(call.call_date).toLocaleDateString('en-US', {
+                  {new Date(call.call_datetime).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
-                  })}
+                    timeZone: 'America/New_York',
+                  })}{' '}
+                  at{' '}
+                  {new Date(call.call_datetime).toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: 'America/New_York',
+                  })}{' '}
+                  EST
                 </p>
                 <p className="text-xs text-slate-500">
                   {call.total_duration_formatted} | {call.total_turns} turns

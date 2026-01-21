@@ -90,12 +90,17 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
             </h2>
             {callDetails && (
               <p className="text-sm text-slate-500">
-                {new Date(callDetails.call_date).toLocaleDateString('en-US', {
+                {new Date(callDetails.call_datetime).toLocaleString('en-US', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
-                })}
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                  timeZone: 'America/New_York',
+                })}{' '}
+                EST
               </p>
             )}
           </div>
