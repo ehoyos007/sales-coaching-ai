@@ -43,6 +43,15 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 24 (2026-01-21)
+- [x] Added team-centric agent management to Admin Panel
+  - New `onUpdateMember` prop in TeamList for member assignment
+  - Team Members section in Edit Team modal
+  - Dropdown to add available agents to team
+  - Member list with Remove button for each agent
+  - Loading states on add/remove operations
+  - Empty state message when team has no agents
+
 ### Session 22 (2026-01-21)
 - [x] Added loading states throughout the application
   - UserMenu: Sign out button shows spinner and "Signing out..." text

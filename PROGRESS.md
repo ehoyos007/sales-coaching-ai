@@ -1,5 +1,37 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 24
+
+### Summary
+Added team-centric agent management to the Admin Panel — users can now add/remove agents directly from the Edit Team modal.
+
+### Completed
+- [x] Added `onUpdateMember` prop to TeamList component for team member assignment
+- [x] Added Team Members section to Edit Team modal with:
+  - Dropdown to add available agents (shows only unassigned agents)
+  - Member list with avatar, name, email, and Remove button
+  - Loading spinner on individual member operations
+  - Empty state message when no agents in team
+- [x] Wired up AdminPage to pass `handleUpdateTeam` as `onUpdateMember`
+- [x] Updated modal size and added scroll support for better UX
+- [x] TypeScript compilation verified
+- [x] Committed and pushed to main
+
+### Files Changed
+- `client/src/pages/Admin/components/TeamList.tsx` — Added member management section, helpers, state
+- `client/src/pages/Admin/AdminPage.tsx` — Passed `handleUpdateTeam` to TeamList
+
+### Git Activity
+```
+2279482 feat(admin): add agent management directly in team edit modal
+```
+
+### Next Steps
+- [ ] Test agent add/remove in production
+- [ ] Consider adding bulk agent assignment
+
+---
+
 ## 2026-01-21 — Session 23
 
 ### Summary
