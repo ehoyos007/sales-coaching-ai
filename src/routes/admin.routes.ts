@@ -1,18 +1,18 @@
 // =============================================
 // ADMIN ROUTES - Sales Coaching AI
-// Admin-only endpoints for user and team management
+// Endpoints for user and team management (Admin and Manager)
 // =============================================
 
 import { Router, Request, Response } from 'express';
 import { authService } from '../services/auth/auth.service.js';
 import { agentsService } from '../services/database/agents.service.js';
-import { authenticate, requireAdmin } from '../middleware/auth.middleware.js';
+import { authenticate, requireManagerOrAdmin } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// All admin routes require authentication and admin role
+// All admin routes require authentication and admin or manager role
 router.use(authenticate);
-router.use(requireAdmin);
+router.use(requireManagerOrAdmin);
 
 // =============================================
 // GET /admin/users - List all users

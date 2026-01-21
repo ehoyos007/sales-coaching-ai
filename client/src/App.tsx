@@ -185,11 +185,11 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Protected route with role restriction - Admin panel (admin only) */}
+        {/* Protected route with role restriction - Admin panel (admin and manager) */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredRoles={['admin']}>
+            <ProtectedRoute requiredRoles={['admin', 'manager']}>
               <AdminPage />
             </ProtectedRoute>
           }

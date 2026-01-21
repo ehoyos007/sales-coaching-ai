@@ -258,21 +258,21 @@ export class AuthService {
   }
 
   // =============================================
-  // ROLE MANAGEMENT (Admin Only)
+  // ROLE MANAGEMENT (Admin or Manager)
   // =============================================
 
   /**
-   * Set a user's role (Admin only, between 'agent' and 'manager')
+   * Set a user's role (Admin or Manager, between 'agent' and 'manager')
    */
   async setUserRole(
-    adminUserId: string,
+    callerUserId: string,
     targetUserId: string,
     newRole: 'agent' | 'manager'
   ): Promise<{ success: boolean; error?: string }> {
-    // Verify caller is admin
-    const adminProfile = await this.getUserProfile(adminUserId);
-    if (!adminProfile || adminProfile.role !== 'admin') {
-      return { success: false, error: 'Only admin can change roles' };
+    // Verify caller is admin or manager
+    const callerProfile = await this.getUserProfile(callerUserId);
+    if (!callerProfile || !['admin', 'manager'].includes(callerProfile.role)) {
+      return { success: false, error: 'Only admin or manager can change roles' };
     }
 
     // Check target isn't the admin
@@ -290,18 +290,18 @@ export class AuthService {
   }
 
   // =============================================
-  // TEAM MANAGEMENT (Admin Only)
+  // TEAM MANAGEMENT (Admin or Manager)
   // =============================================
 
   async createTeam(
-    adminUserId: string,
+    callerUserId: string,
     name: string,
     description?: string,
     managerId?: string
   ): Promise<{ success: boolean; team?: Team; error?: string }> {
-    const adminProfile = await this.getUserProfile(adminUserId);
-    if (!adminProfile || adminProfile.role !== 'admin') {
-      return { success: false, error: 'Only admin can create teams' };
+    const callerProfile = await this.getUserProfile(callerUserId);
+    if (!callerProfile || !['admin', 'manager'].includes(callerProfile.role)) {
+      return { success: false, error: 'Only admin or manager can create teams' };
     }
 
     // If managerId is provided, verify the user exists and is a manager
@@ -327,13 +327,13 @@ export class AuthService {
   }
 
   async updateTeam(
-    adminUserId: string,
+    callerUserId: string,
     teamId: string,
     updates: { name?: string; description?: string; manager_id?: string | null }
   ): Promise<{ success: boolean; team?: Team; error?: string }> {
-    const adminProfile = await this.getUserProfile(adminUserId);
-    if (!adminProfile || adminProfile.role !== 'admin') {
-      return { success: false, error: 'Only admin can update teams' };
+    const callerProfile = await this.getUserProfile(callerUserId);
+    if (!callerProfile || !['admin', 'manager'].includes(callerProfile.role)) {
+      return { success: false, error: 'Only admin or manager can update teams' };
     }
 
     // Verify team exists
@@ -379,12 +379,12 @@ export class AuthService {
   }
 
   async deleteTeam(
-    adminUserId: string,
+    callerUserId: string,
     teamId: string
   ): Promise<{ success: boolean; error?: string }> {
-    const adminProfile = await this.getUserProfile(adminUserId);
-    if (!adminProfile || adminProfile.role !== 'admin') {
-      return { success: false, error: 'Only admin can delete teams' };
+    const callerProfile = await this.getUserProfile(callerUserId);
+    if (!callerProfile || !['admin', 'manager'].includes(callerProfile.role)) {
+      return { success: false, error: 'Only admin or manager can delete teams' };
     }
 
     // Verify team exists
@@ -466,13 +466,13 @@ export class AuthService {
   }
 
   async assignUserToTeam(
-    adminUserId: string,
+    callerUserId: string,
     targetUserId: string,
     teamId: string | null
   ): Promise<{ success: boolean; error?: string }> {
-    const adminProfile = await this.getUserProfile(adminUserId);
-    if (!adminProfile || adminProfile.role !== 'admin') {
-      return { success: false, error: 'Only admin can assign teams' };
+    const callerProfile = await this.getUserProfile(callerUserId);
+    if (!callerProfile || !['admin', 'manager'].includes(callerProfile.role)) {
+      return { success: false, error: 'Only admin or manager can assign teams' };
     }
 
     const { error } = await this.dbClient
