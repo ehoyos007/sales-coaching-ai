@@ -430,12 +430,7 @@ interface ObjectionSnippet {
 }
 
 function formatObjectionAnalysis(data: Record<string, unknown>): string {
-  // If we have a pre-generated summary from Claude, use it
-  if (data.summary) {
-    return data.summary as string;
-  }
-
-  // Otherwise, format the objection analysis manually
+  // Always format the structured analysis to show verbatim snippets
   const agentName = data.agent_name as string;
   const callDate = data.call_date as string;
   const duration = data.duration as string;
@@ -535,6 +530,12 @@ function formatObjectionAnalysis(data: Record<string, unknown>): string {
     response += `### 📈 Biggest Opportunity\n\n`;
     response += `${analysis.biggest_opportunity.description}\n`;
     response += `**Suggestion:** ${analysis.biggest_opportunity.suggestion}\n`;
+  }
+
+  // Add coaching summary if available
+  const summary = data.summary as string | undefined;
+  if (summary) {
+    response += `\n---\n\n### 🎯 Coaching Summary\n\n${summary}`;
   }
 
   return response;

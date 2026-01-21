@@ -43,6 +43,16 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 26 (2026-01-21)
+- [x] Enhanced objection analysis with verbatim snippets and pattern tracking
+  - Created `agent_objection_stats` and `objection_occurrences` database tables
+  - Added RPC functions for recording and querying objection stats
+  - Created `agent-objection-stats.service.ts` with non-blocking recording
+  - Enhanced prompts for verbatim snippet extraction from transcripts
+  - Pattern-aware coaching summaries using agent's historical weak/strong areas
+  - Updated response formatter to display Customer/Agent quote format
+  - Applied migration to Supabase production
+
 ### Session 25 (2026-01-21)
 - [x] Completed Sales Scripts Management feature deployment
   - Database migration verified (sales_scripts, rubric_sync_log tables)

@@ -1,5 +1,63 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 26
+
+### Summary
+Enhanced objection analysis with verbatim transcript snippets and agent stats tracking for pattern-aware coaching.
+
+### Completed
+- [x] Created database migration for `agent_objection_stats` and `objection_occurrences` tables
+- [x] Created RPC functions: `record_objection()`, `get_agent_objection_stats()`, `get_agent_weak_areas()`, `get_agent_strong_areas()`, `get_team_objection_trends()`
+- [x] Created TypeScript types for objection tracking (`ObjectionSnippet`, `EnhancedObjectionFound`, `AgentObjectionStats`, etc.)
+- [x] Created agent objection stats service with non-blocking recording pattern
+- [x] Added enhanced prompts: `buildEnhancedObjectionAnalysisPrompt()` for verbatim snippet extraction
+- [x] Added pattern-aware prompt: `buildPatternAwareObjectionSummaryPrompt()` with agent history context
+- [x] Updated objection analysis handler to fetch history, use enhanced prompts, and record stats (fire-and-forget)
+- [x] Updated response formatter to display Customer/Agent verbatim snippets
+- [x] Verified TypeScript build passes
+- [x] Applied migration to Supabase production
+- [x] Committed and pushed to main
+
+### Files Created
+- `supabase/migrations/20260123000000_add_agent_objection_stats.sql` — Database schema with tables, indexes, RPC functions, RLS policies
+- `src/types/objection.types.ts` — TypeScript interfaces for objection tracking and stats
+- `src/services/database/agent-objection-stats.service.ts` — Service for recording and querying objection stats
+
+### Files Modified
+- `src/types/index.ts` — Added export for objection types
+- `src/prompts/objection-analysis.ts` — Added enhanced prompts with snippet extraction and pattern awareness
+- `src/services/chat/handlers/objection-analysis.handler.ts` — Integrated stats fetching, enhanced prompts, stats recording
+- `src/services/chat/response.formatter.ts` — Updated to display Customer/Agent verbatim snippets
+
+### Key Design Decisions
+1. **Non-blocking stats recording**: Uses fire-and-forget pattern so stats failures don't impact user experience
+2. **Two tables**: `agent_objection_stats` for aggregated fast queries + `objection_occurrences` for audit trail
+3. **RPC functions**: Atomic operations and computed fields handled in database layer
+4. **Backward compatibility**: Original prompt functions preserved, new enhanced versions added
+5. **History threshold**: Only shows weak/strong areas after 2+ occurrences of that objection type
+
+### Display Format
+```markdown
+**Objection #1: Price Concern**
+
+> **Customer:** "That's way more than I'm paying now..."
+
+> **Agent:** "I understand, $200 sounds like a lot..."
+
+**Score:** 4/5 - Strong acknowledgment and redirect
+```
+
+### Git Activity
+```
+0afd8a5 feat(scripts): add sales scripts management feature with AI-powered rubric sync
+```
+
+### Next Steps
+- [ ] Test objection analysis with multiple calls to verify pattern detection
+- [ ] Add team-wide objection trend reporting endpoint
+
+---
+
 ## 2026-01-21 — Session 25
 
 ### Summary
