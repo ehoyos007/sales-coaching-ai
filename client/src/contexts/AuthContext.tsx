@@ -157,8 +157,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error(response.error || 'Sign up failed');
       }
 
-      // Note: Sign up might require email confirmation,
-      // so we don't automatically sign the user in
+      // Auto-login after successful registration
+      const signInResponse = await apiSignIn(email, password);
+
+      if (!signInResponse.success) {
+        throw new Error(signInResponse.error || 'Account created but sign in failed');
+      }
+
+      if (signInResponse.data) {
+        setAuthUser(signInResponse.data.user);
+        setProfile(signInResponse.data.profile);
+        setSentryUser({
+          id: signInResponse.data.user.id,
+          email: signInResponse.data.user.email,
+          role: signInResponse.data.profile.role,
+        });
+      }
     },
     []
   );
