@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { Team, UserProfile } from '../../../types';
+import type { Team, UserProfile, Agent } from '../../../types';
 
 interface TeamListProps {
   teams: Team[];
   users: UserProfile[];
+  agents: Agent[];
   managers: UserProfile[];
   onCreateTeam: (name: string, description?: string, managerId?: string) => Promise<void>;
   onUpdateTeam: (teamId: string, updates: { name?: string; description?: string; manager_id?: string | null }) => Promise<void>;
-  onUpdateMember: (userId: string, teamId: string | null) => Promise<void>;
+  onUpdateAgentTeam: (agentUserId: string, teamId: string | null) => Promise<void>;
   onDeleteTeam: (teamId: string) => Promise<void>;
   isCreating: boolean;
   isUpdating: boolean;
@@ -28,10 +29,11 @@ const getManagerDisplayName = (managerId: string | null, users: UserProfile[]): 
 export const TeamList: React.FC<TeamListProps> = ({
   teams,
   users,
+  agents,
   managers,
   onCreateTeam,
   onUpdateTeam,
-  onUpdateMember,
+  onUpdateAgentTeam,
   onDeleteTeam,
   isCreating,
   isUpdating,
@@ -155,45 +157,49 @@ export const TeamList: React.FC<TeamListProps> = ({
     });
   };
 
-  const getUserDisplayName = (user: UserProfile): string => {
-    if (user.first_name) {
-      return `${user.first_name} ${user.last_name || ''}`.trim();
-    }
-    return user.email.split('@')[0];
+  const getAgentDisplayName = (agent: Agent): string => {
+    return agent.first_name || agent.email?.split('@')[0] || 'Unknown';
   };
 
-  const getUserInitials = (user: UserProfile): string => {
-    if (user.first_name) {
-      return `${user.first_name[0]}${user.last_name?.[0] || ''}`.toUpperCase();
+  const getAgentInitials = (agent: Agent): string => {
+    if (agent.first_name) {
+      const parts = agent.first_name.split(' ');
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return agent.first_name.slice(0, 2).toUpperCase();
     }
-    return user.email.slice(0, 2).toUpperCase();
+    if (agent.email) {
+      return agent.email.slice(0, 2).toUpperCase();
+    }
+    return '??';
   };
 
-  const handleAddMember = async (userId: string) => {
+  const handleAddMember = async (agentUserId: string) => {
     if (!editingTeam) return;
-    setUpdatingMemberId(userId);
+    setUpdatingMemberId(agentUserId);
     try {
-      await onUpdateMember(userId, editingTeam.id);
+      await onUpdateAgentTeam(agentUserId, editingTeam.id);
     } finally {
       setUpdatingMemberId(null);
     }
   };
 
-  const handleRemoveMember = async (userId: string) => {
-    setUpdatingMemberId(userId);
+  const handleRemoveMember = async (agentUserId: string) => {
+    setUpdatingMemberId(agentUserId);
     try {
-      await onUpdateMember(userId, null);
+      await onUpdateAgentTeam(agentUserId, null);
     } finally {
       setUpdatingMemberId(null);
     }
   };
 
-  // Get team members and available agents for the editing team
+  // Get team members and available agents for the editing team (from agents table)
   const teamMembers = editingTeam
-    ? users.filter(u => u.role === 'agent' && u.team_id === editingTeam.id)
+    ? agents.filter(a => a.team_id === editingTeam.id)
     : [];
   const availableAgents = editingTeam
-    ? users.filter(u => u.role === 'agent' && u.team_id !== editingTeam.id)
+    ? agents.filter(a => a.team_id !== editingTeam.id)
     : [];
 
   return (
@@ -404,9 +410,9 @@ export const TeamList: React.FC<TeamListProps> = ({
           About Teams
         </h4>
         <ul className="text-sm text-slate-500 space-y-1">
-          <li>- Teams help organize users for better management</li>
-          <li>- Users can be assigned to teams from the Users tab</li>
-          <li>- Managers can view performance data for their team members</li>
+          <li>- Teams help organize sales agents for better management</li>
+          <li>- Click a team card to add or remove agents</li>
+          <li>- Managers can view performance data for their team's agents</li>
           <li>- Assign a manager to receive team performance reports</li>
         </ul>
       </div>
@@ -517,10 +523,10 @@ export const TeamList: React.FC<TeamListProps> = ({
                 </select>
               </div>
 
-              {/* Team Members Section */}
+              {/* Team Members Section (Sales Agents) */}
               <div className="pt-4 border-t border-slate-200">
                 <h3 className="text-sm font-medium text-slate-700 mb-3">
-                  Team Members ({teamMembers.length})
+                  Sales Agents ({teamMembers.length})
                 </h3>
 
                 {/* Add Agent Dropdown */}
@@ -541,8 +547,8 @@ export const TeamList: React.FC<TeamListProps> = ({
                         : 'Add agent to team...'}
                     </option>
                     {availableAgents.map(agent => (
-                      <option key={agent.id} value={agent.id}>
-                        {getUserDisplayName(agent)} ({agent.email})
+                      <option key={agent.agent_user_id} value={agent.agent_user_id}>
+                        {getAgentDisplayName(agent)} {agent.email ? `(${agent.email})` : ''}
                       </option>
                     ))}
                   </select>
@@ -557,31 +563,33 @@ export const TeamList: React.FC<TeamListProps> = ({
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {teamMembers.map(member => (
                       <div
-                        key={member.id}
+                        key={member.agent_user_id}
                         className="flex items-center justify-between p-2 bg-slate-50 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
                           {/* Avatar */}
                           <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-xs font-medium text-primary-700">
-                            {getUserInitials(member)}
+                            {getAgentInitials(member)}
                           </div>
                           {/* Info */}
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-slate-900 truncate">
-                              {getUserDisplayName(member)}
+                              {getAgentDisplayName(member)}
                             </p>
-                            <p className="text-xs text-slate-500 truncate">
-                              {member.email}
-                            </p>
+                            {member.email && (
+                              <p className="text-xs text-slate-500 truncate">
+                                {member.email}
+                              </p>
+                            )}
                           </div>
                         </div>
                         {/* Remove Button */}
                         <button
-                          onClick={() => handleRemoveMember(member.id)}
-                          disabled={updatingMemberId === member.id}
+                          onClick={() => handleRemoveMember(member.agent_user_id)}
+                          disabled={updatingMemberId === member.agent_user_id}
                           className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
                         >
-                          {updatingMemberId === member.id ? (
+                          {updatingMemberId === member.agent_user_id ? (
                             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                               <circle
                                 className="opacity-25"
@@ -611,7 +619,7 @@ export const TeamList: React.FC<TeamListProps> = ({
               {/* Team Stats */}
               <div className="pt-4 border-t border-slate-200">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Members:</span>
+                  <span className="text-slate-500">Agents:</span>
                   <span className="font-medium text-slate-900">{teamMembers.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm mt-1">

@@ -6,6 +6,7 @@ export interface Agent {
   extension: string | null;
   active: boolean;
   admin: boolean;
+  team_id: string | null;
   created_at: string;
 }
 

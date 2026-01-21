@@ -89,9 +89,75 @@ export async function resolveAgentMatches(name: string): Promise<ResolvedAgent[]
   }));
 }
 
+/**
+ * Update an agent's team assignment
+ */
+export async function updateAgentTeam(
+  agentUserId: string,
+  teamId: string | null
+): Promise<Agent | null> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('agents')
+    .update({ team_id: teamId })
+    .eq('agent_user_id', agentUserId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update agent team: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Get agents by team ID
+ */
+export async function getAgentsByTeam(teamId: string): Promise<Agent[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('agents')
+    .select('*')
+    .eq('team_id', teamId)
+    .eq('active', true)
+    .order('first_name');
+
+  if (error) {
+    throw new Error(`Failed to get agents by team: ${error.message}`);
+  }
+
+  return data || [];
+}
+
+/**
+ * Get agents not assigned to any team
+ */
+export async function getUnassignedAgents(): Promise<Agent[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('agents')
+    .select('*')
+    .is('team_id', null)
+    .eq('active', true)
+    .order('first_name');
+
+  if (error) {
+    throw new Error(`Failed to get unassigned agents: ${error.message}`);
+  }
+
+  return data || [];
+}
+
 export const agentsService = {
   listAgents,
   getAgentById,
   resolveByName,
   resolveAgentMatches,
+  updateAgentTeam,
+  getAgentsByTeam,
+  getUnassignedAgents,
 };

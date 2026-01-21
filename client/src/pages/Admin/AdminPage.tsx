@@ -5,13 +5,15 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import {
   getAdminUsers,
   getAdminTeams,
+  getAdminAgents,
   updateUserRole,
   updateUserTeam,
+  updateAgentTeam,
   createTeam,
   updateTeam,
   deleteTeam,
 } from '../../services/api';
-import type { UserProfile, UserRole, Team } from '../../types';
+import type { UserProfile, UserRole, Team, Agent } from '../../types';
 
 type TabId = 'users' | 'teams';
 
@@ -19,6 +21,7 @@ export const AdminPage: React.FC = () => {
   // Data state
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
 
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
@@ -33,16 +36,17 @@ export const AdminPage: React.FC = () => {
   // UI state
   const [activeTab, setActiveTab] = useState<TabId>('users');
 
-  // Fetch users and teams on mount
+  // Fetch users, teams, and agents on mount
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const [usersResponse, teamsResponse] = await Promise.all([
+        const [usersResponse, teamsResponse, agentsResponse] = await Promise.all([
           getAdminUsers(),
           getAdminTeams(),
+          getAdminAgents(),
         ]);
 
         if (usersResponse.success && usersResponse.data) {
@@ -55,6 +59,12 @@ export const AdminPage: React.FC = () => {
           setTeams(teamsResponse.data.teams);
         } else {
           throw new Error(teamsResponse.error || 'Failed to fetch teams');
+        }
+
+        if (agentsResponse.success && agentsResponse.data) {
+          setAgents(agentsResponse.data.agents);
+        } else {
+          throw new Error(agentsResponse.error || 'Failed to fetch agents');
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -198,10 +208,16 @@ export const AdminPage: React.FC = () => {
           // Remove the team from local state
           setTeams(prevTeams => prevTeams.filter(team => team.id !== teamId));
 
-          // Refresh users to update their team assignments
-          const usersResponse = await getAdminUsers();
+          // Refresh users and agents to update their team assignments
+          const [usersResponse, agentsResponse] = await Promise.all([
+            getAdminUsers(),
+            getAdminAgents(),
+          ]);
           if (usersResponse.success && usersResponse.data) {
             setUsers(usersResponse.data.users);
+          }
+          if (agentsResponse.success && agentsResponse.data) {
+            setAgents(agentsResponse.data.agents);
           }
         } else {
           throw new Error(response.error || 'Failed to delete team');
@@ -210,6 +226,40 @@ export const AdminPage: React.FC = () => {
         setError(err instanceof Error ? err.message : 'Failed to delete team');
       } finally {
         setIsDeletingTeam(false);
+      }
+    },
+    []
+  );
+
+  // Handle agent team assignment (for sales agents from agents table)
+  const handleUpdateAgentTeam = useCallback(
+    async (agentUserId: string, teamId: string | null) => {
+      setIsUpdatingTeam(true);
+      setError(null);
+
+      try {
+        const response = await updateAgentTeam(agentUserId, teamId);
+
+        if (response.success && response.data) {
+          // Update the agent in local state
+          setAgents(prevAgents =>
+            prevAgents.map(agent =>
+              agent.agent_user_id === agentUserId ? response.data!.agent : agent
+            )
+          );
+
+          // Refresh teams to update member counts
+          const teamsResponse = await getAdminTeams();
+          if (teamsResponse.success && teamsResponse.data) {
+            setTeams(teamsResponse.data.teams);
+          }
+        } else {
+          throw new Error(response.error || 'Failed to update agent team');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update agent team');
+      } finally {
+        setIsUpdatingTeam(false);
       }
     },
     []
@@ -380,10 +430,11 @@ export const AdminPage: React.FC = () => {
             <TeamList
               teams={teams}
               users={users}
+              agents={agents}
               managers={managers}
               onCreateTeam={handleCreateTeam}
               onUpdateTeam={handleUpdateTeamDetails}
-              onUpdateMember={handleUpdateTeam}
+              onUpdateAgentTeam={handleUpdateAgentTeam}
               onDeleteTeam={handleDeleteTeam}
               isCreating={isCreatingTeam}
               isUpdating={isUpdatingTeam}

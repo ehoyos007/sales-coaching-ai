@@ -377,6 +377,21 @@ export async function deleteTeam(teamId: string): Promise<ApiResponse<void>> {
   });
 }
 
+// Admin API - Agent Management (Sales Agents)
+export async function getAdminAgents(): Promise<ApiResponse<{ agents: Agent[]; count: number }>> {
+  return request<ApiResponse<{ agents: Agent[]; count: number }>>('/admin/agents');
+}
+
+export async function updateAgentTeam(
+  agentUserId: string,
+  teamId: string | null
+): Promise<ApiResponse<{ agent: Agent }>> {
+  return request<ApiResponse<{ agent: Agent }>>(`/admin/agents/${agentUserId}/team`, {
+    method: 'PUT',
+    body: JSON.stringify({ teamId }),
+  });
+}
+
 // Sales Scripts API
 export async function getScripts(): Promise<ApiResponse<ScriptsByProductType>> {
   return request<ApiResponse<ScriptsByProductType>>('/scripts');

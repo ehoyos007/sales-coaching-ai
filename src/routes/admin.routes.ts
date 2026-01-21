@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { authService } from '../services/auth/auth.service.js';
+import { agentsService } from '../services/database/agents.service.js';
 import { authenticate, requireAdmin } from '../middleware/auth.middleware.js';
 
 const router = Router();
@@ -311,7 +312,7 @@ router.delete('/teams/:teamId', async (req: Request, res: Response) => {
 });
 
 // =============================================
-// GET /admin/teams/:teamId/members - Get team members
+// GET /admin/teams/:teamId/members - Get team members (user_profiles)
 // =============================================
 router.get('/teams/:teamId/members', async (req: Request, res: Response) => {
   try {
@@ -330,6 +331,102 @@ router.get('/teams/:teamId/members', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get team members',
+    });
+  }
+});
+
+// =============================================
+// AGENT MANAGEMENT (Sales Agents from agents table)
+// =============================================
+
+// =============================================
+// GET /admin/agents - List all sales agents
+// =============================================
+router.get('/agents', async (req: Request, res: Response) => {
+  try {
+    const agents = await agentsService.listAgents();
+
+    console.log(`[admin.routes] Listed ${agents.length} agents (by ${req.user?.email})`);
+
+    res.json({
+      success: true,
+      data: {
+        agents,
+        count: agents.length,
+      },
+    });
+  } catch (error) {
+    console.error('[admin.routes] List agents error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to list agents',
+    });
+  }
+});
+
+// =============================================
+// PUT /admin/agents/:agentUserId/team - Assign agent to team
+// =============================================
+router.put('/agents/:agentUserId/team', async (req: Request, res: Response) => {
+  try {
+    const { agentUserId } = req.params;
+    const { teamId } = req.body;
+
+    // teamId can be null to unassign from team
+    if (teamId !== null && typeof teamId !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: 'teamId must be a string or null',
+      });
+      return;
+    }
+
+    const updatedAgent = await agentsService.updateAgentTeam(agentUserId, teamId);
+
+    if (!updatedAgent) {
+      res.status(404).json({
+        success: false,
+        error: 'Agent not found',
+      });
+      return;
+    }
+
+    console.log(`[admin.routes] Agent team assigned: ${agentUserId} -> team ${teamId || 'none'} (by ${req.user?.email})`);
+
+    res.json({
+      success: true,
+      message: teamId ? 'Agent assigned to team' : 'Agent removed from team',
+      data: { agent: updatedAgent },
+    });
+  } catch (error) {
+    console.error('[admin.routes] Assign agent team error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to assign agent team',
+    });
+  }
+});
+
+// =============================================
+// GET /admin/teams/:teamId/agents - Get agents assigned to a team
+// =============================================
+router.get('/teams/:teamId/agents', async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.params;
+    const agents = await agentsService.getAgentsByTeam(teamId);
+
+    res.json({
+      success: true,
+      data: {
+        agents,
+        count: agents.length,
+      },
+    });
+  } catch (error) {
+    console.error('[admin.routes] Get team agents error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get team agents',
     });
   }
 });
