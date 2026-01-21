@@ -100,10 +100,25 @@ Implemented Team Overview & Agent Overview Dashboard Pages with charts, metrics,
 - AgentOverviewPage.tsx: Removed unused variable
 - AgentBreakdownTable.tsx: Rewrote to use direct table instead of generic DataTable
 
+### Deployment
+- [x] Applied migration to Supabase production (all tables and RPC functions created)
+- [x] Deployed backend to Railway (commit `befea99`)
+- [x] Deployed frontend to Vercel production
+
+### Production URLs
+- **Frontend:** https://sales-coaching-ai.vercel.app
+- **Backend:** https://sales-coaching-api-production.up.railway.app
+- **Team Overview:** `/teams/:teamId/overview`
+- **Agent Overview:** `/agents/:agentId/overview`
+
+### Git Activity
+```
+2f4bc5f feat(dashboard): implement team & agent overview dashboard with analytics
+befea99 docs: mark dashboard migration as completed in production
+```
+
 ### Next Steps
-- [ ] Run database migration in production
-- [ ] Deploy backend and frontend
-- [ ] Test with real data
+- [ ] Test dashboards with real data in production
 - [ ] Add unit tests for dashboard services
 
 ---
