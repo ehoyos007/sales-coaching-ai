@@ -351,6 +351,7 @@ export const AdminPage: React.FC = () => {
               managers={managers}
               onCreateTeam={handleCreateTeam}
               onUpdateTeam={handleUpdateTeamDetails}
+              onUpdateMember={handleUpdateTeam}
               isCreating={isCreatingTeam}
               isUpdating={isUpdatingTeam}
             />

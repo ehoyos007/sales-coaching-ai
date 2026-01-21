@@ -7,6 +7,7 @@ interface TeamListProps {
   managers: UserProfile[];
   onCreateTeam: (name: string, description?: string, managerId?: string) => Promise<void>;
   onUpdateTeam: (teamId: string, updates: { name?: string; description?: string; manager_id?: string | null }) => Promise<void>;
+  onUpdateMember: (userId: string, teamId: string | null) => Promise<void>;
   isCreating: boolean;
   isUpdating: boolean;
 }
@@ -28,6 +29,7 @@ export const TeamList: React.FC<TeamListProps> = ({
   managers,
   onCreateTeam,
   onUpdateTeam,
+  onUpdateMember,
   isCreating,
   isUpdating,
 }) => {
@@ -42,6 +44,9 @@ export const TeamList: React.FC<TeamListProps> = ({
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editManagerId, setEditManagerId] = useState('');
+
+  // Member management state
+  const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -126,6 +131,47 @@ export const TeamList: React.FC<TeamListProps> = ({
       day: 'numeric',
     });
   };
+
+  const getUserDisplayName = (user: UserProfile): string => {
+    if (user.first_name) {
+      return `${user.first_name} ${user.last_name || ''}`.trim();
+    }
+    return user.email.split('@')[0];
+  };
+
+  const getUserInitials = (user: UserProfile): string => {
+    if (user.first_name) {
+      return `${user.first_name[0]}${user.last_name?.[0] || ''}`.toUpperCase();
+    }
+    return user.email.slice(0, 2).toUpperCase();
+  };
+
+  const handleAddMember = async (userId: string) => {
+    if (!editingTeam) return;
+    setUpdatingMemberId(userId);
+    try {
+      await onUpdateMember(userId, editingTeam.id);
+    } finally {
+      setUpdatingMemberId(null);
+    }
+  };
+
+  const handleRemoveMember = async (userId: string) => {
+    setUpdatingMemberId(userId);
+    try {
+      await onUpdateMember(userId, null);
+    } finally {
+      setUpdatingMemberId(null);
+    }
+  };
+
+  // Get team members and available agents for the editing team
+  const teamMembers = editingTeam
+    ? users.filter(u => u.role === 'agent' && u.team_id === editingTeam.id)
+    : [];
+  const availableAgents = editingTeam
+    ? users.filter(u => u.role === 'agent' && u.team_id !== editingTeam.id)
+    : [];
 
   return (
     <div className="p-6">
@@ -361,7 +407,7 @@ export const TeamList: React.FC<TeamListProps> = ({
           <div
             ref={modalRef}
             tabIndex={-1}
-            className="relative w-full max-w-md mx-4 bg-white rounded-xl shadow-2xl"
+            className="relative w-full max-w-lg mx-4 bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
@@ -448,11 +494,102 @@ export const TeamList: React.FC<TeamListProps> = ({
                 </select>
               </div>
 
+              {/* Team Members Section */}
+              <div className="pt-4 border-t border-slate-200">
+                <h3 className="text-sm font-medium text-slate-700 mb-3">
+                  Team Members ({teamMembers.length})
+                </h3>
+
+                {/* Add Agent Dropdown */}
+                <div className="mb-3">
+                  <select
+                    value=""
+                    onChange={e => {
+                      if (e.target.value) {
+                        handleAddMember(e.target.value);
+                      }
+                    }}
+                    disabled={availableAgents.length === 0 || updatingMemberId !== null}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-slate-50 disabled:text-slate-400"
+                  >
+                    <option value="">
+                      {availableAgents.length === 0
+                        ? 'All agents assigned to teams'
+                        : 'Add agent to team...'}
+                    </option>
+                    {availableAgents.map(agent => (
+                      <option key={agent.id} value={agent.id}>
+                        {getUserDisplayName(agent)} ({agent.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Member List */}
+                {teamMembers.length === 0 ? (
+                  <p className="text-sm text-slate-400 italic py-4 text-center">
+                    No agents in this team yet
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {teamMembers.map(member => (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between p-2 bg-slate-50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Avatar */}
+                          <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-xs font-medium text-primary-700">
+                            {getUserInitials(member)}
+                          </div>
+                          {/* Info */}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-900 truncate">
+                              {getUserDisplayName(member)}
+                            </p>
+                            <p className="text-xs text-slate-500 truncate">
+                              {member.email}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Remove Button */}
+                        <button
+                          onClick={() => handleRemoveMember(member.id)}
+                          disabled={updatingMemberId === member.id}
+                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                        >
+                          {updatingMemberId === member.id ? (
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                          ) : (
+                            'Remove'
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Team Stats */}
               <div className="pt-4 border-t border-slate-200">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500">Members:</span>
-                  <span className="font-medium text-slate-900">{editingTeam.member_count ?? 0}</span>
+                  <span className="font-medium text-slate-900">{teamMembers.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm mt-1">
                   <span className="text-slate-500">Created:</span>
