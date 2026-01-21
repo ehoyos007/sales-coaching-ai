@@ -43,6 +43,15 @@ Preparing for deployment and adding polish features
 
 ## ✅ Done
 
+### Session 25 (2026-01-21)
+- [x] Completed Sales Scripts Management feature deployment
+  - Database migration verified (sales_scripts, rubric_sync_log tables)
+  - Created sales-scripts storage bucket in Supabase
+  - Backend: File upload, PDF/DOCX parsing, AI sync workflow
+  - Frontend: ScriptsManager, ScriptUploadWizard, SyncReviewPanel components
+  - New "Sales Scripts" tab in Rubric Settings
+  - API endpoints for script CRUD and rubric sync
+
 ### Session 24 (2026-01-21)
 - [x] Added team-centric agent management to Admin Panel
   - New `onUpdateMember` prop in TeamList for member assignment

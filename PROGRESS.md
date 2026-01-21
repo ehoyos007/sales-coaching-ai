@@ -1,5 +1,46 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 25
+
+### Summary
+Completed Sales Scripts Management feature deployment — verified database migration, created storage bucket, and pushed to production.
+
+### Completed
+- [x] Verified database migration already applied (sales_scripts, rubric_sync_log tables exist)
+- [x] Verified source_type columns added to rubric_categories, rubric_scoring_criteria, rubric_red_flags
+- [x] Created `sales-scripts` storage bucket in Supabase (10MB limit, restricted MIME types)
+- [x] Verified backend build passes
+- [x] Verified frontend build passes
+- [x] Committed all Sales Scripts feature code (30 files, 5,938 insertions)
+- [x] Pushed to origin/main
+
+### Feature Summary
+
+**What was implemented:**
+- Upload sales scripts (.txt, .pdf, .docx, .md) with versioning per product type
+- AI-powered script-to-rubric comparison analysis using Claude
+- Review panel for approving/rejecting proposed rubric changes
+- New "Sales Scripts" tab in Rubric Settings page
+
+**Key files added:**
+- `supabase/migrations/20260122000000_add_sales_scripts.sql` — Database schema
+- `src/services/scripts/script-parser.service.ts` — PDF/DOCX parsing
+- `src/services/scripts/script-sync.service.ts` — AI sync workflow
+- `client/src/pages/Settings/components/ScriptsManager.tsx` — Scripts panel
+- `client/src/pages/Settings/components/ScriptUploadWizard.tsx` — Upload wizard
+- `client/src/pages/Settings/components/SyncReviewPanel.tsx` — Change review
+
+### Git Activity
+```
+0afd8a5 feat(scripts): add sales scripts management feature with AI-powered rubric sync
+```
+
+### Next Steps
+- [ ] Test end-to-end upload and sync workflow in production
+- [ ] Add script content preview/viewer
+
+---
+
 ## 2026-01-21 — Session 24
 
 ### Summary
