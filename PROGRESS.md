@@ -1,5 +1,49 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 21
+
+### Summary
+Added centralized user-friendly error messages across all chat handlers.
+
+### Completed
+- [x] Created `src/utils/error-messages.ts` with centralized error handling
+- [x] Added `ErrorMessages` object with friendly messages for all common scenarios
+- [x] Added `buildErrorMessage()` function that classifies errors by category
+- [x] Updated all 7 chat handlers to use consistent error handling
+- [x] Improved empty state messages with actionable suggestions
+- [x] Technical errors now logged but hidden from users
+- [x] Updated TASKS.md with completion notes
+- [x] Committed and pushed to main
+
+### Files Changed
+- `src/utils/error-messages.ts` — New: Centralized error message utility
+- `src/services/chat/handlers/list-calls.handler.ts` — Use ErrorMessages
+- `src/services/chat/handlers/agent-stats.handler.ts` — Use ErrorMessages
+- `src/services/chat/handlers/get-transcript.handler.ts` — Use ErrorMessages
+- `src/services/chat/handlers/coaching.handler.ts` — Use ErrorMessages
+- `src/services/chat/handlers/team-summary.handler.ts` — Use ErrorMessages
+- `src/services/chat/handlers/search-calls.handler.ts` — Use ErrorMessages
+- `src/services/chat/handlers/objection-analysis.handler.ts` — Use ErrorMessages
+- `src/services/chat/response.formatter.ts` — Import ErrorMessages for empty states
+- `TASKS.md` — Marked error messages task complete
+
+### Decisions Made
+- **Centralized utility**: Created single error-messages.ts file rather than inline messages for consistency
+- **Error classification**: Errors are classified by category (DB, AI, network, etc.) to provide appropriate responses
+- **Suggestions included**: Empty states and errors include actionable next steps for users
+
+### Git Activity
+```
+7a9776c feat(errors): add user-friendly error messages across all chat handlers
+```
+
+### Next Steps
+- [ ] Add Loading States to Sidebar
+- [ ] Set up CI/CD pipeline
+- [ ] Add health check endpoint monitoring
+
+---
+
 ## 2026-01-20 — Session 1
 
 ### Summary
