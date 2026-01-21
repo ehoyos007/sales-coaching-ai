@@ -519,10 +519,10 @@ export class AuthService {
       scope.teamName = team?.name || null;
     }
 
-    // ADMIN: Always gets all agents
+    // ADMIN: Always gets all agents from the agents table
     if (profile.role === 'admin') {
-      const { data } = await this.supabase
-        .from('user_profiles')
+      const { data } = await this.dbClient
+        .from('agents')
         .select('agent_user_id')
         .not('agent_user_id', 'is', null);
 
@@ -534,18 +534,18 @@ export class AuthService {
     // MANAGER: Team or floor-wide based on parameter
     if (profile.role === 'manager') {
       if (floorWide) {
-        // Floor-wide access
-        const { data } = await this.supabase
-          .from('user_profiles')
+        // Floor-wide access - get all agents from the agents table
+        const { data } = await this.dbClient
+          .from('agents')
           .select('agent_user_id')
           .not('agent_user_id', 'is', null);
 
         scope.agentUserIds = (data || []).map(d => d.agent_user_id).filter(Boolean);
         scope.isFloorWide = true;
       } else {
-        // Team-only access
-        const { data } = await this.supabase
-          .from('user_profiles')
+        // Team-only access - get agents from the agents table with matching team_id
+        const { data } = await this.dbClient
+          .from('agents')
           .select('agent_user_id')
           .eq('team_id', profile.team_id)
           .not('agent_user_id', 'is', null);
