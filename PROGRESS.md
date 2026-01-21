@@ -1188,3 +1188,62 @@ e4bdefe feat: add Sentry error tracking for backend and frontend
 - [ ] Add password reset flow
 - [ ] Add email verification for new signups
 - [ ] Add source maps upload for better stack traces
+
+---
+
+## 2026-01-20 — Session 20
+
+### Summary
+Fixed TypeScript build error causing Vercel deployment failure and deployed to production.
+
+### Completed
+- [x] Diagnosed Vercel build error: `Property 'agents' does not exist on type 'never'`
+- [x] Root cause: Type mismatch between backend response and frontend API typing
+- [x] Backend returns `{ agents: Agent[], count: number }` but API was typed as `Agent[]`
+- [x] Fixed `getAgents()` return type to match actual backend response
+- [x] Simplified `useAgents` hook to directly access `response.data.agents`
+- [x] Verified local build passes
+- [x] Committed and pushed fix
+- [x] Deployed to Vercel production
+
+### Files Changed
+- `client/src/services/api.ts` — Fixed `getAgents()` return type to `{ agents: Agent[]; count: number }`
+- `client/src/hooks/useAgents.ts` — Simplified data extraction to `response.data.agents`
+
+### Bug Details
+**Error:**
+```
+src/hooks/useAgents.ts(25,89): error TS2339: Property 'agents' does not exist on type 'never'.
+```
+
+**Cause:** The `Array.isArray()` check narrowed `response.data` to `never` in the else branch because the type said it was `Agent[]` (always an array).
+
+**Fix:**
+```typescript
+// api.ts - before
+export async function getAgents(): Promise<ApiResponse<Agent[]>>
+
+// api.ts - after
+export async function getAgents(): Promise<ApiResponse<{ agents: Agent[]; count: number }>>
+
+// useAgents.ts - before
+const agentsData = Array.isArray(response.data) ? response.data : response.data.agents;
+
+// useAgents.ts - after
+setAgents(response.data.agents || []);
+```
+
+### Git Activity
+```
+03c04f9 fix(api): correct getAgents return type to match backend response
+```
+
+### Deployment
+- **Vercel:** https://client-38777qzuh-enzo-hoyos-projects.vercel.app
+- **Build:** Passed ✓
+
+### Next Steps
+- [ ] Performance monitoring
+- [ ] Add password reset flow
+- [ ] Add email verification for new signups
+- [ ] Add source maps upload for better stack traces
