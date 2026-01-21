@@ -8,6 +8,7 @@ import {
   updateUserRole,
   updateUserTeam,
   createTeam,
+  updateTeam,
 } from '../../services/api';
 import type { UserProfile, UserRole, Team } from '../../types';
 
@@ -22,6 +23,7 @@ export const AdminPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+  const [isUpdatingTeam, setIsUpdatingTeam] = useState(false);
 
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -126,16 +128,19 @@ export const AdminPage: React.FC = () => {
 
   // Handle team creation
   const handleCreateTeam = useCallback(
-    async (name: string, description?: string) => {
+    async (name: string, description?: string, managerId?: string) => {
       setIsCreatingTeam(true);
       setError(null);
 
       try {
-        const response = await createTeam(name, description);
+        const response = await createTeam(name, description, managerId);
 
         if (response.success && response.data) {
-          // Add the new team to the local state
-          setTeams(prevTeams => [...prevTeams, response.data!.team]);
+          // Refresh teams to get the new team with member count
+          const teamsResponse = await getAdminTeams();
+          if (teamsResponse.success && teamsResponse.data) {
+            setTeams(teamsResponse.data.teams);
+          }
         } else {
           throw new Error(response.error || 'Failed to create team');
         }
@@ -147,6 +152,39 @@ export const AdminPage: React.FC = () => {
     },
     []
   );
+
+  // Handle team update
+  const handleUpdateTeamDetails = useCallback(
+    async (teamId: string, updates: { name?: string; description?: string; manager_id?: string | null }) => {
+      setIsUpdatingTeam(true);
+      setError(null);
+
+      try {
+        const response = await updateTeam(teamId, updates);
+
+        if (response.success && response.data) {
+          // Update the team in the local state
+          setTeams(prevTeams =>
+            prevTeams.map(team =>
+              team.id === teamId
+                ? { ...response.data!.team, member_count: team.member_count }
+                : team
+            )
+          );
+        } else {
+          throw new Error(response.error || 'Failed to update team');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update team');
+      } finally {
+        setIsUpdatingTeam(false);
+      }
+    },
+    []
+  );
+
+  // Get managers for team assignment
+  const managers = users.filter(u => u.role === 'manager' || u.role === 'admin');
 
   if (isLoading) {
     return (
@@ -309,8 +347,12 @@ export const AdminPage: React.FC = () => {
           {activeTab === 'teams' && (
             <TeamList
               teams={teams}
+              users={users}
+              managers={managers}
               onCreateTeam={handleCreateTeam}
+              onUpdateTeam={handleUpdateTeamDetails}
               isCreating={isCreatingTeam}
+              isUpdating={isUpdatingTeam}
             />
           )}
         </div>
