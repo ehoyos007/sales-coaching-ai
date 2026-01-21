@@ -6,3 +6,4 @@ export * from './session.types.js';
 export * from './rubric.types.js';
 export * from './scripts.types.js';
 export * from './objection.types.js';
+export * from './dashboard.types.js';

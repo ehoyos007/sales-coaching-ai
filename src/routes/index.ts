@@ -8,6 +8,7 @@ import teamRoutes from './team.routes.js';
 import searchRoutes from './search.routes.js';
 import rubricRoutes from './rubric.routes.js';
 import scriptsRoutes from './scripts.routes.js';
+import dashboardRoutes from './dashboard.routes.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use('/team', teamRoutes);
 router.use('/search', searchRoutes);
 router.use('/rubric', rubricRoutes);
 router.use('/scripts', scriptsRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 // Health check endpoint
 router.get('/health', (_req, res) => {

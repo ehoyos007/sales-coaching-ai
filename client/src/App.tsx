@@ -9,6 +9,8 @@ import { CallDetailsModal } from './components/CallDetails/CallDetailsModal';
 import { RubricSettings } from './pages/Settings';
 import { LoginPage } from './pages/Login';
 import { AdminPage } from './pages/Admin';
+import { TeamOverviewPage } from './pages/TeamOverview';
+import { AgentOverviewPage } from './pages/AgentOverview';
 import { useChat } from './hooks/useChat';
 import { useAgents } from './hooks/useAgents';
 import { useCalls } from './hooks/useCalls';
@@ -189,6 +191,26 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute requiredRoles={['admin']}>
               <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Team Overview Dashboard - managers and admin only */}
+        <Route
+          path="/teams/:teamId/overview"
+          element={
+            <ProtectedRoute requiredRoles={['admin', 'manager']}>
+              <TeamOverviewPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Agent Overview Dashboard - all authenticated users */}
+        <Route
+          path="/agents/:agentId/overview"
+          element={
+            <ProtectedRoute>
+              <AgentOverviewPage />
             </ProtectedRoute>
           }
         />

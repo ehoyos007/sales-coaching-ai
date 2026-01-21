@@ -1,7 +1,7 @@
 # TASKS.md
 
 ## 🎯 Current Focus
-Preparing for deployment and adding polish features
+Dashboard pages deployed, ready for production testing
 
 ---
 
@@ -15,11 +15,19 @@ Preparing for deployment and adding polish features
 
 ### High Priority
 
-*No high priority tasks at this time*
+- [ ] **Run Dashboard Migration in Production**
+  - Description: Apply `20260122000001_add_dashboard_tables.sql` to Supabase production
+  - Includes: compliance_scores, agent_goals tables, RPC functions
+
+- [ ] **Deploy Dashboard Changes**
+  - Description: Deploy backend to Railway, frontend to Vercel
+  - Test: Team overview, agent overview pages with real data
 
 ### Medium Priority
 
-*No medium priority tasks at this time*
+- [ ] **Add Unit Tests for Dashboard Services**
+  - Description: Test dashboard, compliance, goals services
+  - Coverage: Aggregation logic, RPC function calls
 
 ### Low Priority / Backlog
 
@@ -42,6 +50,16 @@ Preparing for deployment and adding polish features
 ---
 
 ## ✅ Done
+
+### Session 30 (2026-01-21)
+- [x] **Team Overview & Agent Overview Dashboard Pages**
+  - Database: Created `compliance_scores`, `agent_goals` tables with RPC functions
+  - Backend: Dashboard, compliance, goals services + controller + routes
+  - Frontend: Installed Recharts, created 10 dashboard components
+  - Team Overview: Summary cards, agent breakdown table, trend/bar/donut charts
+  - Agent Overview: Performance metrics, team comparison, charts, goals progress
+  - Navigation: Routes `/teams/:teamId/overview`, `/agents/:agentId/overview`
+  - Fixed TypeScript compilation errors in Recharts components
 
 ### Session 29 (2026-01-21)
 - [x] Fixed account creation button not responding to clicks
@@ -244,4 +262,4 @@ Preparing for deployment and adding polish features
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 29)
+**Last Updated:** 2026-01-21 (Session 30)

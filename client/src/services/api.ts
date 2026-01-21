@@ -28,6 +28,12 @@ import type {
   RubricSyncLog,
   SyncAnalysisResponse,
   ApplySyncInput,
+  TeamOverviewData,
+  AgentOverviewData,
+  DailyTrend,
+  ComplianceSummary,
+  GoalProgress,
+  CreateGoalInput,
 } from '../types';
 
 // Use environment variable for API URL, fallback to relative path for dev proxy
@@ -486,6 +492,120 @@ export async function applySyncChanges(
 export async function rejectSync(syncLogId: string): Promise<ApiResponse<RubricSyncLog>> {
   return request<ApiResponse<RubricSyncLog>>(`/scripts/sync/${syncLogId}/reject`, {
     method: 'POST',
+  });
+}
+
+// Dashboard API
+
+export async function getTeamOverview(
+  teamId: string,
+  params?: { start_date?: string; end_date?: string }
+): Promise<ApiResponse<TeamOverviewData>> {
+  const searchParams = new URLSearchParams();
+  if (params?.start_date) searchParams.set('start_date', params.start_date);
+  if (params?.end_date) searchParams.set('end_date', params.end_date);
+
+  const query = searchParams.toString();
+  const endpoint = `/dashboard/teams/${teamId}/overview${query ? `?${query}` : ''}`;
+
+  return request<ApiResponse<TeamOverviewData>>(endpoint);
+}
+
+export async function getAgentOverview(
+  agentId: string,
+  params?: { start_date?: string; end_date?: string }
+): Promise<ApiResponse<AgentOverviewData>> {
+  const searchParams = new URLSearchParams();
+  if (params?.start_date) searchParams.set('start_date', params.start_date);
+  if (params?.end_date) searchParams.set('end_date', params.end_date);
+
+  const query = searchParams.toString();
+  const endpoint = `/dashboard/agents/${agentId}/overview${query ? `?${query}` : ''}`;
+
+  return request<ApiResponse<AgentOverviewData>>(endpoint);
+}
+
+export async function getCallVolumeTrend(params?: {
+  agent_id?: string;
+  team_id?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<ApiResponse<DailyTrend[]>> {
+  const searchParams = new URLSearchParams();
+  if (params?.agent_id) searchParams.set('agent_id', params.agent_id);
+  if (params?.team_id) searchParams.set('team_id', params.team_id);
+  if (params?.start_date) searchParams.set('start_date', params.start_date);
+  if (params?.end_date) searchParams.set('end_date', params.end_date);
+
+  const query = searchParams.toString();
+  const endpoint = `/dashboard/trends/call-volume${query ? `?${query}` : ''}`;
+
+  return request<ApiResponse<DailyTrend[]>>(endpoint);
+}
+
+export async function getDashboardComplianceSummary(params: {
+  agent_id?: string;
+  team_id?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<ApiResponse<ComplianceSummary>> {
+  const searchParams = new URLSearchParams();
+  if (params.agent_id) searchParams.set('agent_id', params.agent_id);
+  if (params.team_id) searchParams.set('team_id', params.team_id);
+  if (params.start_date) searchParams.set('start_date', params.start_date);
+  if (params.end_date) searchParams.set('end_date', params.end_date);
+
+  const query = searchParams.toString();
+  const endpoint = `/dashboard/compliance/summary${query ? `?${query}` : ''}`;
+
+  return request<ApiResponse<ComplianceSummary>>(endpoint);
+}
+
+export async function getGoalsProgress(params?: {
+  agent_id?: string;
+  team_id?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<ApiResponse<GoalProgress[]>> {
+  const searchParams = new URLSearchParams();
+  if (params?.agent_id) searchParams.set('agent_id', params.agent_id);
+  if (params?.team_id) searchParams.set('team_id', params.team_id);
+  if (params?.start_date) searchParams.set('start_date', params.start_date);
+  if (params?.end_date) searchParams.set('end_date', params.end_date);
+
+  const query = searchParams.toString();
+  const endpoint = `/dashboard/goals/progress${query ? `?${query}` : ''}`;
+
+  return request<ApiResponse<GoalProgress[]>>(endpoint);
+}
+
+export async function createGoal(input: CreateGoalInput): Promise<ApiResponse<GoalProgress>> {
+  return request<ApiResponse<GoalProgress>>('/dashboard/goals', {
+    method: 'POST',
+    body: JSON.stringify({
+      agent_user_id: input.agentUserId,
+      team_id: input.teamId,
+      goal_type: input.goalType,
+      target_value: input.targetValue,
+      period_start: input.periodStart,
+      period_end: input.periodEnd,
+    }),
+  });
+}
+
+export async function updateGoal(
+  goalId: string,
+  updates: { target_value?: number; actual_value?: number; is_active?: boolean }
+): Promise<ApiResponse<GoalProgress>> {
+  return request<ApiResponse<GoalProgress>>(`/dashboard/goals/${goalId}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deleteGoal(goalId: string): Promise<ApiResponse<{ message: string }>> {
+  return request<ApiResponse<{ message: string }>>(`/dashboard/goals/${goalId}`, {
+    method: 'DELETE',
   });
 }
 

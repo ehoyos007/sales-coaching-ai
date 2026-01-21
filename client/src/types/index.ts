@@ -494,3 +494,6 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
 };
 
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+// Dashboard types
+export * from './dashboard.types';

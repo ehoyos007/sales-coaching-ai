@@ -1,5 +1,113 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 30
+
+### Summary
+Implemented Team Overview & Agent Overview Dashboard Pages with charts, metrics, and navigation integration.
+
+### Completed
+- [x] **Phase 1: Database Migration** — Created `compliance_scores` and `agent_goals` tables with RPC functions
+- [x] **Phase 2A: Backend Types** — Created `src/types/dashboard.types.ts` with all dashboard interfaces
+- [x] **Phase 2B: Backend Services** — Created dashboard, compliance, and goals services
+- [x] **Phase 2C: Backend Routes** — Created dashboard controller and routes with authentication
+- [x] **Phase 3: Frontend Infrastructure** — Installed Recharts, created types, API functions, hooks
+- [x] **Phase 4: Shared Dashboard Components** — Created 10 reusable chart/metric components
+- [x] **Phase 5: Team Overview Page** — Built team dashboard with agent breakdown table
+- [x] **Phase 6: Agent Overview Page** — Built individual agent dashboard with trends
+- [x] **Phase 7: Navigation & Routing** — Updated App.tsx, Sidebar.tsx, TeamList.tsx
+- [x] Fixed TypeScript compilation errors in Recharts components
+
+### Files Created (31 files)
+
+**Database:**
+- `supabase/migrations/20260122000001_add_dashboard_tables.sql`
+
+**Backend:**
+- `src/types/dashboard.types.ts`
+- `src/services/database/dashboard.service.ts`
+- `src/services/database/compliance.service.ts`
+- `src/services/database/goals.service.ts`
+- `src/controllers/dashboard.controller.ts`
+- `src/routes/dashboard.routes.ts`
+
+**Frontend Types/Hooks:**
+- `client/src/types/dashboard.types.ts`
+- `client/src/hooks/useDashboard.ts`
+
+**Dashboard Components (10):**
+- `client/src/components/Dashboard/index.ts`
+- `client/src/components/Dashboard/DateRangeFilter.tsx`
+- `client/src/components/Dashboard/MetricCard.tsx`
+- `client/src/components/Dashboard/TrendChart.tsx`
+- `client/src/components/Dashboard/BarChart.tsx`
+- `client/src/components/Dashboard/DonutChart.tsx`
+- `client/src/components/Dashboard/DataTable.tsx`
+- `client/src/components/Dashboard/GoalProgressBar.tsx`
+- `client/src/components/Dashboard/ComplianceBadge.tsx`
+- `client/src/components/Dashboard/PerformanceDelta.tsx`
+
+**Team Overview Page:**
+- `client/src/pages/TeamOverview/index.ts`
+- `client/src/pages/TeamOverview/TeamOverviewPage.tsx`
+- `client/src/pages/TeamOverview/components/AgentBreakdownTable.tsx`
+- `client/src/pages/TeamOverview/components/TeamSummaryCards.tsx`
+
+**Agent Overview Page:**
+- `client/src/pages/AgentOverview/index.ts`
+- `client/src/pages/AgentOverview/AgentOverviewPage.tsx`
+- `client/src/pages/AgentOverview/components/AgentSummaryCards.tsx`
+- `client/src/pages/AgentOverview/components/ObjectionDetailList.tsx`
+
+### Files Modified
+- `src/routes/index.ts` — Registered dashboard routes
+- `src/types/index.ts` — Exported dashboard types
+- `client/package.json` — Added recharts dependency
+- `client/src/types/index.ts` — Exported dashboard types
+- `client/src/services/api.ts` — Added dashboard API functions
+- `client/src/hooks/index.ts` — Exported useDashboard hooks
+- `client/src/App.tsx` — Added dashboard routes
+- `client/src/components/Sidebar/Sidebar.tsx` — Added navigation links
+- `client/src/pages/Admin/components/TeamList.tsx` — Added "View Dashboard" link
+
+### New Routes
+| Route | Access | Description |
+|-------|--------|-------------|
+| `/teams/:teamId/overview` | Admin, Manager | Team-wide metrics dashboard |
+| `/agents/:agentId/overview` | All authenticated | Individual agent performance |
+
+### Dashboard Features
+**Team Overview:**
+- Summary cards (calls, duration, talk ratio, compliance)
+- Agent breakdown table with clickable rows
+- Call volume trend chart
+- Talk ratio distribution bar chart
+- Call type donut chart (inbound/outbound)
+- Goals progress section
+
+**Agent Overview:**
+- Summary cards with team comparison
+- Daily call volume trend
+- Duration trend chart
+- Weekly breakdown bar chart
+- Objection handling details
+- Improvement areas section
+- Personal goals progress
+
+### TypeScript Fixes Applied
+- DonutChart.tsx: Made renderCustomLabel params optional with defaults
+- DonutChart.tsx: Fixed Tooltip formatter type handling
+- TrendChart.tsx: Fixed labelFormatter return type
+- AgentOverviewPage.tsx: Removed unused variable
+- AgentBreakdownTable.tsx: Rewrote to use direct table instead of generic DataTable
+
+### Next Steps
+- [ ] Run database migration in production
+- [ ] Deploy backend and frontend
+- [ ] Test with real data
+- [ ] Add unit tests for dashboard services
+
+---
+
 ## 2026-01-21 — Session 29
 
 ### Summary
