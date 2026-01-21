@@ -1,5 +1,44 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 31
+
+### Summary
+Fixed authentication UX issues: account creation button, email confirmation, and auto-login after signup.
+
+### Completed
+- [x] Fixed account creation button not responding (pointer-events issue)
+- [x] Deleted and managed user accounts via admin scripts
+- [x] Troubleshot "Email not confirmed" error after signup
+- [x] Manually confirmed user email via Supabase Admin API
+- [x] Guided user to disable email confirmation in Supabase Dashboard
+- [x] Implemented auto-login after successful registration
+
+### Files Modified
+- `client/src/pages/Login/LoginPage.tsx` — Added `pointer-events-none` to blur overlay
+- `client/src/contexts/AuthContext.tsx` — Auto-login after signup instead of staying on login page
+
+### Bug Fixes
+
+**1. Button Click Not Working**
+- Cause: Decorative blur div intercepting pointer events
+- Fix: Added `pointer-events-none` class
+
+**2. Email Not Confirmed Error**
+- Cause: Supabase Auth requires email confirmation by default
+- Fix: Disabled email confirmation in Supabase Dashboard (Authentication → Providers → Email)
+
+**3. No Redirect After Signup**
+- Cause: `signUp` function returned without signing user in
+- Fix: After successful signup, automatically call `signIn` with same credentials
+
+### Git Activity
+```
+6a9b600 fix(login): prevent decorative blur overlay from blocking click events on submit button
+56a5381 feat(auth): auto-login after successful registration
+```
+
+---
+
 ## 2026-01-21 — Session 30
 
 ### Summary

@@ -45,6 +45,13 @@ Dashboard pages deployed, ready for production testing
 
 ## ✅ Done
 
+### Session 31 (2026-01-21)
+- [x] Fixed authentication UX issues
+  - Debugged and fixed account creation button (pointer-events on blur div)
+  - Troubleshot "Email not confirmed" error — disabled email confirmation in Supabase
+  - Implemented auto-login after successful registration
+  - Files: `LoginPage.tsx`, `AuthContext.tsx`
+
 ### Session 30 (2026-01-21)
 - [x] **Team Overview & Agent Overview Dashboard Pages** — Full implementation + production deployment
   - Database: Created `compliance_scores`, `agent_goals` tables with 6 RPC functions
@@ -257,4 +264,4 @@ Dashboard pages deployed, ready for production testing
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 30 — Dashboard deployed to production)
+**Last Updated:** 2026-01-21 (Session 31)
