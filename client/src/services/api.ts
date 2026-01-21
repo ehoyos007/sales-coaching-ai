@@ -183,8 +183,8 @@ export async function getChatHistory(
 }
 
 // Agents API
-export async function getAgents(): Promise<ApiResponse<Agent[]>> {
-  return request<ApiResponse<Agent[]>>('/agents');
+export async function getAgents(): Promise<ApiResponse<{ agents: Agent[]; count: number }>> {
+  return request<ApiResponse<{ agents: Agent[]; count: number }>>('/agents');
 }
 
 export async function getAgentCalls(
