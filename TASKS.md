@@ -45,6 +45,13 @@ Dashboard pages deployed, ready for production testing
 
 ## ✅ Done
 
+### Session 35 (2026-01-21)
+- [x] Added admin role switcher for testing/debugging
+  - New RoleSwitcher component in sidebar footer (admin-only)
+  - localStorage-based role simulation (Manager/Agent views)
+  - Page reloads on role change, DEV badge when active
+  - Files: `RoleSwitcher.tsx`, `AuthContext.tsx`, `Sidebar.tsx`
+
 ### Session 34 (2026-01-21)
 - [x] Added navigation accessibility for Team Overview and Agent Overview pages
   - Added "Team Overview" link in sidebar for managers (shows when team is assigned)
@@ -286,4 +293,4 @@ Dashboard pages deployed, ready for production testing
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 34)
+**Last Updated:** 2026-01-21 (Session 35)

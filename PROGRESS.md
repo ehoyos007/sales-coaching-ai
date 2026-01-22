@@ -1,5 +1,45 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 35
+
+### Summary
+Added admin role switcher for testing/debugging - allows admins to simulate Manager or Agent roles without changing their database role.
+
+### Completed
+- [x] Created RoleSwitcher component with dropdown UI
+- [x] Implemented localStorage-based role override (persists across refreshes)
+- [x] Modified AuthContext to apply role override for admin users only
+- [x] Added RoleSwitcher to sidebar footer (visible to admins only)
+- [x] Deployed to Vercel production
+
+### Files Created
+- `client/src/components/Sidebar/RoleSwitcher.tsx` — Dropdown component with role selection
+
+### Files Modified
+- `client/src/contexts/AuthContext.tsx` — Check localStorage for role override, apply to CombinedUser
+- `client/src/components/Sidebar/Sidebar.tsx` — Import and render RoleSwitcher for admins
+
+### Feature Details
+
+**How it works:**
+1. Admin sees "View as: Admin" dropdown in sidebar footer
+2. Clicking reveals options: Admin (actual), Manager, Agent
+3. Selecting a role saves to localStorage and triggers page reload
+4. App renders with simulated role (shows "DEV" badge when active)
+5. Select "Admin" to clear override and return to normal
+
+**Safety features:**
+- Only admins can see/use the switcher (checks `profile?.role === 'admin'`)
+- Override only applies if actual database role is 'admin'
+- localStorage key: `dev_roleOverride`
+
+### Git Activity
+```
+62066b1 feat(admin): add role switcher for testing/debugging
+```
+
+---
+
 ## 2026-01-21 — Session 34
 
 ### Summary
