@@ -1,5 +1,52 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 32
+
+### Summary
+Fixed dashboard 500 errors and navigation issues: SQL GROUP BY error in agent overview RPC function and removed broken "My Performance" link.
+
+### Completed
+- [x] Diagnosed 500 error on `/agents/:agentId/overview` endpoint
+- [x] Fixed SQL GROUP BY error in `get_agent_overview_metrics` RPC function
+  - Root cause: Mixed aggregate functions (AVG) with window functions (PERCENT_RANK) in same SELECT
+  - Solution: Restructured using 3 CTEs (agent_stats, team_averages, agent_percentiles)
+- [x] Applied SQL fix directly to Supabase production
+- [x] Updated local migration file with the fix
+- [x] Removed "My Performance" link from Sidebar
+  - Root cause: Link used `profile.id` (auth user ID) instead of `agent_user_id`
+  - Admin/manager users don't have call data since they're not sales agents
+- [x] Deployed fix to Vercel production
+
+### Files Modified
+- `supabase/migrations/20260122000001_add_dashboard_tables.sql` — Fixed team_comparison CTE structure
+- `client/src/components/Sidebar/Sidebar.tsx` — Removed broken "My Performance" link
+
+### Bug Details
+
+**Bug 1: SQL GROUP BY Error**
+```
+ERROR: column agent_calls.call_count must appear in the GROUP BY clause
+or be used in an aggregate function
+```
+The `team_comparison` subquery mixed `AVG()` aggregates with `PERCENT_RANK()` window functions. Fixed by separating into CTEs.
+
+**Bug 2: Wrong ID for Agent Overview**
+The "My Performance" link used `profile.id` (auth user ID like `198a4c2b-...`) but the dashboard expects `agent_user_id` from the `agents` table. Admins/managers are app users, not sales agents with call recordings.
+
+### Dashboard Access
+| Page | How to Access |
+|------|---------------|
+| Team Overview | Admin Panel → Team card → "View Dashboard" |
+| Agent Overview | Team Overview → Click agent row in table |
+
+### Git Activity
+```
+1144b90 fix(dashboard): restructure team comparison query to fix GROUP BY error
+15073a0 fix(sidebar): remove My Performance link that used wrong ID
+```
+
+---
+
 ## 2026-01-21 — Session 31
 
 ### Summary

@@ -45,6 +45,14 @@ Dashboard pages deployed, ready for production testing
 
 ## ✅ Done
 
+### Session 32 (2026-01-21)
+- [x] Fixed dashboard 500 errors and navigation
+  - Fixed SQL GROUP BY error in `get_agent_overview_metrics` RPC function
+  - Restructured team_comparison query using CTEs
+  - Removed broken "My Performance" link from Sidebar (used wrong ID type)
+  - Deployed fixes to Supabase (SQL) and Vercel (frontend)
+  - Files: `20260122000001_add_dashboard_tables.sql`, `Sidebar.tsx`
+
 ### Session 31 (2026-01-21)
 - [x] Fixed authentication UX issues
   - Debugged and fixed account creation button (pointer-events on blur div)
@@ -264,4 +272,4 @@ Dashboard pages deployed, ready for production testing
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 31)
+**Last Updated:** 2026-01-21 (Session 32)
