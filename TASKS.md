@@ -45,6 +45,20 @@ Dashboard pages deployed, ready for production testing
 
 ## ✅ Done
 
+### Session 34 (2026-01-21)
+- [x] Added navigation accessibility for Team Overview and Agent Overview pages
+  - Added "Team Overview" link in sidebar for managers (shows when team is assigned)
+  - Added "My Performance" link in sidebar for agents
+  - Team Overview → Agent Detail navigation already existed (click agent row)
+  - File: `client/src/components/Sidebar/Sidebar.tsx`
+
+### Session 33 (2026-01-21)
+- [x] Fixed manager data scoping issues
+  - Agent name resolution now scoped to accessible agents only
+  - Helpful error message when agent not found in team
+  - Admin Panel button visible to managers in Sidebar
+  - Files: `agents.service.ts`, `chat.service.ts`, `Sidebar.tsx`
+
 ### Session 32 (2026-01-21)
 - [x] Fixed dashboard 500 errors and navigation
   - Fixed SQL GROUP BY error in `get_agent_overview_metrics` RPC function
@@ -272,4 +286,4 @@ Dashboard pages deployed, ready for production testing
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 32)
+**Last Updated:** 2026-01-21 (Session 34)

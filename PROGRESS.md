@@ -1,5 +1,41 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 33
+
+### Summary
+Fixed manager data scoping issues: scoped agent name resolution to team-accessible agents and made Admin Panel button visible to managers.
+
+### Completed
+- [x] Fixed agent name resolution scoping issue
+  - Bug: When manager asked about agent not on team, fuzzy match returned different agent's data
+  - Fix: Added `resolveByNameScoped()` to limit name matching to accessible agents only
+  - Added `getAgentNamesByIds()` for helpful error messages listing available agents
+- [x] Fixed Admin Panel button visibility for managers
+  - Button now shows for both 'admin' and 'manager' roles
+
+### Files Modified
+- `src/services/database/agents.service.ts` — Added `resolveByNameScoped()` and `getAgentNamesByIds()` functions
+- `src/services/chat/chat.service.ts` — Use scoped resolution for non-admin users, show helpful error when agent not found
+- `client/src/components/Sidebar/Sidebar.tsx` — Show Admin Panel link for managers
+
+### Bug Details
+
+**Agent Name Resolution Returning Wrong Data**
+- Symptom: Manager asks about "Arturo" (not on team), system shows "Aidan's" data (on team) labeled as "Arturo"
+- Root cause: Global fuzzy match via `resolveByName()` could return any agent, then access check passed because resolved agent was accessible
+- Fix: For non-admins, scope name resolution to `dataScope.agentUserIds` only. If no match found, return helpful error listing available agents.
+
+**Admin Panel Button Not Visible to Managers**
+- Cause: Sidebar only checked `role === 'admin'`
+- Fix: Check `role === 'admin' || role === 'manager'`
+
+### Git Activity
+```
+ac16d09 fix(auth): scope agent name resolution to accessible agents
+```
+
+---
+
 ## 2026-01-21 — Session 32
 
 ### Summary
