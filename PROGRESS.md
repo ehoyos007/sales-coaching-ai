@@ -1,5 +1,24 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 36
+
+### Summary
+Granted Admin role privileges to yjulian@firsthealthenroll.org.
+
+### Completed
+- [x] Updated database constraint to allow multiple admin users
+- [x] Changed user role from 'manager' to 'admin'
+
+### Database Changes
+- Modified `check_admin_constraint()` trigger function to remove single-admin restriction
+- Updated `user_profiles` table: set `role = 'admin'` for yjulian@firsthealthenroll.org
+
+### Notes
+- Previous constraint only allowed `ehoyos@firsthealthenroll.org` to have admin role
+- User will need to log out and log back in for the new role to take effect
+
+---
+
 ## 2026-01-21 — Session 35
 
 ### Summary
