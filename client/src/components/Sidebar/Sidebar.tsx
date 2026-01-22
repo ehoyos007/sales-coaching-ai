@@ -4,7 +4,7 @@ import { AgentList } from './AgentList';
 import { QuickActions } from './QuickActions';
 import { RoleSwitcher } from './RoleSwitcher';
 import { useAuth } from '../../hooks/useAuth';
-import { getTeams } from '../../services/api';
+import { getAdminTeams } from '../../services/api';
 import type { Agent, Team } from '../../types';
 
 interface SidebarProps {
@@ -42,13 +42,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     if (needsTeamFetch) {
-      getTeams()
-        .then((response) => {
+      getAdminTeams()
+        .then((response: { success: boolean; data?: { teams: Team[] } }) => {
           if (response.success && response.data?.teams) {
             setTeams(response.data.teams);
           }
         })
-        .catch((err) => {
+        .catch((err: Error) => {
           console.error('Failed to fetch teams:', err);
         });
     }
