@@ -1,5 +1,45 @@
 # PROGRESS.md
 
+## 2026-01-21 — Session 34
+
+### Summary
+Added navigation accessibility for Team Overview and Agent Overview pages via sidebar links.
+
+### Completed
+- [x] Added "Team Overview" link in sidebar for managers (visible when team is assigned)
+- [x] Added "My Performance" link in sidebar for agents
+- [x] Updated TASKS.md with Session 34 documentation
+- [x] Committed and pushed changes
+
+### Files Modified
+- `client/src/components/Sidebar/Sidebar.tsx` — Added Team Overview and My Performance links with role-based visibility
+- `TASKS.md` — Added Session 34 entry
+
+### Navigation Changes
+
+| Role | New Sidebar Link | Destination |
+|------|------------------|-------------|
+| Manager | Team Overview | `/teams/:teamId/overview` |
+| Agent | My Performance | `/agents/:agentId/overview` |
+
+### Navigation Flow
+```
+Manager:
+  Sidebar [Team Overview] → /teams/:teamId/overview
+                                ↓ click agent row (already working)
+                           /agents/:agentId/overview
+
+Agent:
+  Sidebar [My Performance] → /agents/:userId/overview
+```
+
+### Git Activity
+```
+3f01ae1 feat(sidebar): add navigation links for Team Overview and My Performance
+```
+
+---
+
 ## 2026-01-21 — Session 33
 
 ### Summary
