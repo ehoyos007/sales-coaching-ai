@@ -2,7 +2,8 @@
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
   "framework": "vite",
-  "installCommand": "npm install",
+  "installCommand": "npm install && cd client && npm install",
+  "devCommand": "cd client && npm run dev",
   "functions": {
     "api/**/*.ts": {
       "memory": 1024,
