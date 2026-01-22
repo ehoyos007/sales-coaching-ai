@@ -18,7 +18,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <LoadingSpinner size="lg" />
           <p className="text-sm text-slate-500">Checking authentication...</p>
@@ -41,7 +41,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       // User doesn't have required role - redirect to home with an error
       // In a more complete implementation, you might show an "Unauthorized" page
       return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center">
           <div className="bg-white rounded-xl border border-slate-200 p-8 max-w-md mx-4 text-center">
             <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AgentList } from './AgentList';
 import { QuickActions } from './QuickActions';
+import { RoleSwitcher } from './RoleSwitcher';
 import { useAuth } from '../../hooks/useAuth';
 import type { Agent } from '../../types';
 
@@ -186,6 +187,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </svg>
               Rubric Settings
             </Link>
+          )}
+
+          {/* Role Switcher - Admin only (for testing/debugging) */}
+          {profile?.role === 'admin' && user && (
+            <div className="pt-2 border-t border-slate-200 mt-2">
+              <RoleSwitcher currentEffectiveRole={user.role} />
+            </div>
           )}
 
           <p className="text-xs text-slate-500 text-center pt-2">

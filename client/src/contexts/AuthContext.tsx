@@ -17,6 +17,7 @@ import {
   clearToken,
 } from '../services/api';
 import { setSentryUser, clearSentryUser } from '../lib/sentry';
+import { getRoleOverride } from '../components/Sidebar/RoleSwitcher';
 
 // Combined user object that merges AuthUser with profile data for convenience
 export interface CombinedUser {
@@ -74,9 +75,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = useMemo(() => authUser !== null, [authUser]);
 
   // Combined user object for convenience
+  // Applies role override for admin users (dev testing feature)
   const user = useMemo<CombinedUser | null>(() => {
     if (!authUser || !profile) return null;
-    return createCombinedUser(authUser, profile);
+    const baseUser = createCombinedUser(authUser, profile);
+
+    // Only admins can have their role overridden (for testing)
+    if (profile.role === 'admin') {
+      const roleOverride = getRoleOverride();
+      if (roleOverride) {
+        return { ...baseUser, role: roleOverride };
+      }
+    }
+
+    return baseUser;
   }, [authUser, profile]);
 
   const refreshProfile = useCallback(async () => {
