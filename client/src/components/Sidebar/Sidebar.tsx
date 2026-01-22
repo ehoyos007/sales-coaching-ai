@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AgentList } from './AgentList';
 import { QuickActions } from './QuickActions';
 import { RoleSwitcher } from './RoleSwitcher';
 import { useAuth } from '../../hooks/useAuth';
-import type { Agent } from '../../types';
+import { getTeams } from '../../services/api';
+import type { Agent, Team } from '../../types';
 
 interface SidebarProps {
   agents: Agent[];
@@ -32,7 +33,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onQuickAction,
 }) => {
   const [activeTab, setActiveTab] = useState<SidebarTab>('actions');
+  const [teams, setTeams] = useState<Team[]>([]);
   const { profile, user } = useAuth();
+
+  // Fetch teams for admin/manager users who don't have a team assigned
+  const isAdminOrManager = user?.role === 'admin' || user?.role === 'manager';
+  const needsTeamFetch = isAdminOrManager && !user?.teamId;
+
+  useEffect(() => {
+    if (needsTeamFetch) {
+      getTeams()
+        .then((response) => {
+          if (response.success && response.data?.teams) {
+            setTeams(response.data.teams);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch teams:', err);
+        });
+    }
+  }, [needsTeamFetch]);
+
+  // Determine which team ID to use for Team Overview link
+  const teamIdForLink = user?.teamId || (teams.length > 0 ? teams[0].id : null);
 
   return (
     <>
@@ -137,9 +160,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 space-y-2">
 
           {/* Team Overview link - admin and manager */}
-          {(user?.role === 'admin' || user?.role === 'manager') && user?.teamId && (
+          {isAdminOrManager && teamIdForLink && (
             <Link
-              to={`/teams/${user.teamId}/overview`}
+              to={`/teams/${teamIdForLink}/overview`}
               className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -45,6 +45,29 @@ Dashboard pages deployed, ready for production testing
 
 ## ✅ Done
 
+### Session 37 (2026-01-21)
+- [x] Fixed loading screen centering issue
+  - Root cause: `#root` has `display: flex`, loading divs needed `flex-1` to fill container
+  - Added `flex-1` class to loading screens in `ProtectedRoute.tsx` and `LoginPage.tsx`
+- [x] Fixed Team Overview navigation link not showing
+  - Root cause: Users don't have `teamId` set in their profile
+  - Sidebar now fetches available teams for admin/manager users without teamId
+  - Uses first available team for the Team Overview link
+  - Files: `Sidebar.tsx`
+- [x] Fixed Team Overview page crash (UUID type error)
+  - Root cause: Supabase JS client passes strings, but SQL functions expected UUID type
+  - Error: `operator does not exist: uuid = text`
+  - Created migration to change `p_team_id` from UUID to TEXT in RPC functions
+  - Functions fixed: `get_team_overview_metrics`, `get_agent_overview_metrics`, `get_call_volume_trend`, `get_goals_progress`, `get_objection_summary`
+  - Migration: `20260124000000_fix_dashboard_uuid_params.sql`
+  - **ACTION REQUIRED**: Apply migration to Supabase production database
+
+### Session 36 (2026-01-21)
+- [x] Granted Admin role to yjulian@firsthealthenroll.org
+  - Modified database constraint to allow multiple admins
+  - Updated user role from 'manager' to 'admin'
+  - Database: Modified `check_admin_constraint()` function, updated `user_profiles` table
+
 ### Session 35 (2026-01-21)
 - [x] Added admin role switcher for testing/debugging
   - New RoleSwitcher component in sidebar footer (admin-only)
@@ -293,4 +316,4 @@ Dashboard pages deployed, ready for production testing
 
 ---
 
-**Last Updated:** 2026-01-21 (Session 35)
+**Last Updated:** 2026-01-21 (Session 36)

@@ -90,14 +90,14 @@ export const LoginPage: React.FC = () => {
   // Show loading state while checking auth
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 flex items-center justify-center">
+      <div className="flex-1 min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 flex items-center justify-center">
         <LoadingSpinner size="lg" className="text-white" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+    <div className="flex-1 min-h-screen w-full flex items-center justify-center relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900" />
       
