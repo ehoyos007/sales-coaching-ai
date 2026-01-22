@@ -81,17 +81,59 @@ export async function processMessage(
     };
 
     // 3. Resolve agent name to ID if needed
+    const isAdmin = userContext?.role === 'admin';
     if (classification.agent_name && !params.agentId) {
-      const resolved = await agentsService.resolveByName(classification.agent_name);
+      let resolved = null;
+
+      // For non-admins, scope name resolution to accessible agents only
+      if (!isAdmin && dataScope && dataScope.agentUserIds.length > 0) {
+        resolved = await agentsService.resolveByNameScoped(
+          classification.agent_name,
+          dataScope.agentUserIds
+        );
+
+        // If no match found in accessible agents, return helpful error
+        if (!resolved) {
+          const availableNames = await agentsService.getAgentNamesByIds(dataScope.agentUserIds);
+          const nameList = availableNames.slice(0, 5).join(', ');
+          const moreCount = availableNames.length > 5 ? ` and ${availableNames.length - 5} more` : '';
+
+          const errorMessage =
+            userContext?.role === 'agent'
+              ? 'You can only access your own data.'
+              : `Agent "${classification.agent_name}" not found in your team. Available agents: ${nameList}${moreCount}. Ask for "floor-wide" data to see all agents.`;
+
+          const errorResponse: ChatResponse = {
+            success: false,
+            response: errorMessage,
+            intent: classification.intent,
+            timestamp,
+            error: errorMessage,
+          };
+
+          if (sessionId) {
+            await sessionsService.saveMessage({
+              session_id: sessionId,
+              role: 'assistant',
+              content: errorResponse.response,
+              intent: classification.intent,
+            });
+          }
+
+          return errorResponse;
+        }
+      } else {
+        // Admin or no scope - use global resolution
+        resolved = await agentsService.resolveByName(classification.agent_name);
+      }
+
       if (resolved) {
         params.agentId = resolved.agent_user_id;
         params.agentName = resolved.first_name;
       }
     }
 
-    // 4. Check data access permissions for agent-specific queries
-    // Admins can access any agent's data
-    const isAdmin = userContext?.role === 'admin';
+    // 4. Check data access permissions for agent-specific queries (fallback for agentId from context)
     if (params.agentId && dataScope && !isAdmin) {
       // Check if the user can access this agent's data
       if (!dataScope.agentUserIds.includes(params.agentId)) {

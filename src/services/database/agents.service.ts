@@ -152,12 +152,77 @@ export async function getUnassignedAgents(): Promise<Agent[]> {
   return data || [];
 }
 
+/**
+ * Resolve agent name but only from a list of allowed agent IDs
+ * Used to scope name resolution to a manager's team or specific agents
+ */
+export async function resolveByNameScoped(
+  name: string,
+  allowedAgentIds: string[]
+): Promise<ResolvedAgent | null> {
+  if (allowedAgentIds.length === 0) {
+    return null;
+  }
+
+  const supabase = getSupabaseClient();
+
+  // Get all matches from global fuzzy search
+  const { data, error } = await supabase.rpc('resolve_agent_name', { p_name: name });
+
+  if (error) {
+    throw new Error(`Failed to resolve agent name: ${error.message}`);
+  }
+
+  // Filter to only allowed agents
+  const allowedMatches = (data || []).filter(
+    (match: { agent_user_id: string }) => allowedAgentIds.includes(match.agent_user_id)
+  );
+
+  // Return the best match within allowed agents
+  if (allowedMatches.length > 0) {
+    const best = allowedMatches[0];
+    return {
+      agent_user_id: best.agent_user_id,
+      first_name: best.first_name,
+      similarity_score: best.similarity_score || 1.0,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Get agent names by their IDs (for error messages)
+ */
+export async function getAgentNamesByIds(agentIds: string[]): Promise<string[]> {
+  if (agentIds.length === 0) {
+    return [];
+  }
+
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('agents')
+    .select('first_name')
+    .in('agent_user_id', agentIds)
+    .eq('active', true)
+    .order('first_name');
+
+  if (error) {
+    throw new Error(`Failed to get agent names: ${error.message}`);
+  }
+
+  return (data || []).map(a => a.first_name);
+}
+
 export const agentsService = {
   listAgents,
   getAgentById,
   resolveByName,
+  resolveByNameScoped,
   resolveAgentMatches,
   updateAgentTeam,
   getAgentsByTeam,
   getUnassignedAgents,
+  getAgentNamesByIds,
 };
