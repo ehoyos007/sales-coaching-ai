@@ -9,7 +9,14 @@ export function initSentry(): void {
 
   Sentry.init({
     dsn: config.sentry.dsn,
-    environment: config.server.nodeEnv,
+    environment: process.env.VERCEL_ENV || config.server.nodeEnv,
+
+    // Add branch info for filtering errors by deployment
+    initialScope: {
+      tags: {
+        branch: process.env.VERCEL_GIT_COMMIT_REF || 'unknown',
+      },
+    },
 
     // Performance monitoring
     tracesSampleRate: config.server.nodeEnv === 'production' ? 0.1 : 1.0,
@@ -23,8 +30,8 @@ export function initSentry(): void {
       return event;
     },
 
-    // Add release version for source maps
-    release: process.env.npm_package_version || '1.0.0',
+    // Release version includes commit SHA for source maps
+    release: `sales-coaching-ai@${process.env.VERCEL_GIT_COMMIT_SHA || process.env.npm_package_version || 'dev'}`,
   });
 
   console.log('Sentry: Initialized');
