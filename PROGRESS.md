@@ -1,5 +1,40 @@
 # PROGRESS.md
 
+## 2026-01-22 — Session 40
+
+### Summary
+Fixed Vercel deployment runtime errors by applying database migration and cleaning up duplicate RPC functions in Supabase.
+
+### Completed
+- [x] Diagnosed Vercel runtime errors (UUID type mismatch, GROUP BY aggregation)
+- [x] Verified migration `20260124000000_fix_dashboard_uuid_params.sql` was applied
+- [x] Cleaned up duplicate RPC functions (old UUID signatures were still present)
+- [x] Dropped old UUID-signature functions to avoid ambiguity
+- [x] Verified all 5 dashboard RPC functions now use TEXT parameters
+- [x] Tested `get_team_overview_metrics` — returns data correctly
+- [x] Tested `get_agent_overview_metrics` — returns data with team comparison (no GROUP BY error)
+
+### Database Changes
+Functions updated to TEXT parameters:
+- `get_team_overview_metrics(p_team_id TEXT, ...)`
+- `get_agent_overview_metrics(p_agent_user_id TEXT, ...)`
+- `get_call_volume_trend(p_agent_user_id TEXT, p_team_id TEXT, ...)`
+- `get_goals_progress(p_agent_user_id TEXT, p_team_id TEXT, ...)`
+- `get_objection_summary(p_agent_user_id TEXT, p_team_id TEXT, ...)`
+
+Old UUID-signature duplicates dropped.
+
+### Issues Fixed
+1. **UUID = TEXT type mismatch** — Supabase JS client sends strings, functions now accept TEXT
+2. **GROUP BY aggregation error** — Function rewritten with proper CTEs in migration
+
+### Next Steps
+- [ ] Update frontend to use Vercel API routes instead of Railway
+- [ ] Add missing dashboard routes to Vercel serverless functions
+- [ ] Test full Vercel deployment end-to-end
+
+---
+
 ## 2026-01-22 — Session 39
 
 ### Summary

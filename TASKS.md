@@ -1,7 +1,7 @@
 # TASKS.md
 
 ## 🎯 Current Focus
-Dashboard pages deployed, ready for production testing
+Vercel migration - fixing runtime errors and completing API migration
 
 ---
 
@@ -15,7 +15,13 @@ Dashboard pages deployed, ready for production testing
 
 ### High Priority
 
-*No high priority tasks at this time*
+- [ ] **Add dashboard routes to Vercel serverless functions**
+  - Description: Dashboard routes exist in Express but weren't migrated to `/api/`
+  - Routes needed: `/dashboard/teams/:teamId/overview`, `/dashboard/agents/:agentId/overview`, etc.
+
+- [ ] **Update frontend API endpoints to use Vercel**
+  - Description: Frontend currently points to Railway via `VITE_API_URL`
+  - Change: Point to Vercel API routes once they're ready
 
 ### Medium Priority
 
@@ -44,6 +50,13 @@ Dashboard pages deployed, ready for production testing
 ---
 
 ## ✅ Done
+
+### Session 40 (2026-01-22)
+- [x] Fixed Vercel runtime errors in Supabase RPC functions
+  - Applied migration to change UUID parameters to TEXT
+  - Cleaned up duplicate functions (old UUID signatures still existed)
+  - Verified `get_team_overview_metrics` and `get_agent_overview_metrics` work correctly
+  - Database: Dropped old UUID-signature functions
 
 ### Session 37 (2026-01-21)
 - [x] Fixed loading screen centering issue
