@@ -26,19 +26,14 @@ export default createApiHandler({
 
     res.status(201).json({
       success: true,
-      user: result.user
-        ? {
-            id: result.user.id,
-            email: result.user.email,
-          }
-        : null,
-      session: result.session
-        ? {
-            access_token: result.session.access_token,
-            refresh_token: result.session.refresh_token,
-            expires_at: result.session.expires_at,
-          }
-        : null,
+      data: {
+        user: result.user
+          ? {
+              id: result.user.id,
+              email: result.user.email,
+            }
+          : null,
+      },
       message: 'Account created successfully',
     });
   },

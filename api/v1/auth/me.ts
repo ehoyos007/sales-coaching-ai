@@ -10,8 +10,10 @@ export default createApiHandler({
   GET: withAuth(async (req: AuthenticatedRequest, res: VercelResponse) => {
     res.status(200).json({
       success: true,
-      user: req.user,
-      profile: req.profile,
+      data: {
+        user: req.user,
+        profile: req.profile,
+      },
     });
   }),
 });

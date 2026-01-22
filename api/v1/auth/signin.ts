@@ -25,20 +25,22 @@ export default createApiHandler({
 
     res.status(200).json({
       success: true,
-      user: result.user
-        ? {
-            id: result.user.id,
-            email: result.user.email,
-          }
-        : null,
-      profile: result.profile,
-      session: result.session
-        ? {
-            access_token: result.session.access_token,
-            refresh_token: result.session.refresh_token,
-            expires_at: result.session.expires_at,
-          }
-        : null,
+      data: {
+        user: result.user
+          ? {
+              id: result.user.id,
+              email: result.user.email,
+            }
+          : null,
+        profile: result.profile,
+        session: result.session
+          ? {
+              access_token: result.session.access_token,
+              refresh_token: result.session.refresh_token,
+              expires_at: result.session.expires_at,
+            }
+          : null,
+      },
     });
   },
 });

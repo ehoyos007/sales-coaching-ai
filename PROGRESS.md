@@ -1,5 +1,48 @@
 # PROGRESS.md
 
+## 2026-01-22 — Session 42
+
+### Summary
+Tested Vercel deployment, fixed environment variables, removed Railway dependency, and fixed auth API response format mismatches.
+
+### Completed
+- [x] Tested Vercel serverless functions deployment (health, signin, agents endpoints)
+- [x] Identified missing backend environment variables in Vercel (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY)
+- [x] Added required environment variables to Vercel project
+- [x] Removed `VITE_API_URL` pointing to Railway — frontend now uses relative `/api/v1` path for Vercel serverless functions
+- [x] Fixed auth API response format mismatch — wrapped responses in `data` object to match frontend expectations:
+  - `api/v1/auth/signin.ts` — response now uses `{ success, data: { user, profile, session } }`
+  - `api/v1/auth/signup.ts` — response now uses `{ success, data: { user }, message }`
+  - `api/v1/auth/me.ts` — response now uses `{ success, data: { user, profile } }`
+- [x] Updated `AuthContext.tsx` to handle `full_name` field (Vercel API returns `full_name`, not `first_name`/`last_name`)
+- [x] Multiple Vercel deployments for testing and iteration
+
+### Files Changed
+- `api/v1/auth/signin.ts` — Wrapped response in `data` object
+- `api/v1/auth/signup.ts` — Wrapped response in `data` object
+- `api/v1/auth/me.ts` — Wrapped response in `data` object
+- `client/src/contexts/AuthContext.tsx` — Handle both `full_name` and `first_name`/`last_name` formats
+
+### Issues Fixed
+1. **Missing env vars** — Vercel serverless functions were crashing (500 errors) because backend env vars weren't configured
+2. **CORS errors** — Frontend was hitting Railway (`VITE_API_URL`) instead of Vercel API routes; removed env var so frontend uses relative path
+3. **Silent login failure** — Auth responses weren't wrapped in `data` object, so token was never stored and login appeared to do nothing
+
+### Vercel Deployment
+- **Latest Preview URL**: `https://sales-coaching-fg2t4n3jc-enzo-hoyos-projects.vercel.app`
+- **Status**: API routes functional, awaiting full browser login test
+
+### Configuration Notes
+- Supabase URL Configuration must be updated for each new preview deployment (Site URL field)
+- Wildcards not allowed in Supabase Site URL
+
+### Next Steps
+- [ ] Verify browser login works end-to-end on latest deployment
+- [ ] Add dashboard routes to Vercel serverless functions
+- [ ] Deploy to production once verified
+
+---
+
 ## 2026-01-22 — Session 41
 
 ### Summary

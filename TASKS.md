@@ -1,13 +1,16 @@
 # TASKS.md
 
 ## 🎯 Current Focus
-Vercel migration - fixing runtime errors and completing API migration
+Vercel migration - testing and completing deployment
 
 ---
 
 ## 🔥 In Progress
 
-*No tasks currently in progress*
+- [ ] **Verify browser login end-to-end** ← CURRENT
+  - Description: Test login flow in browser on latest Vercel deployment
+  - URL: `https://sales-coaching-fg2t4n3jc-enzo-hoyos-projects.vercel.app`
+  - Supabase Site URL must be updated to match deployment URL
 
 ---
 
@@ -19,9 +22,8 @@ Vercel migration - fixing runtime errors and completing API migration
   - Description: Dashboard routes exist in Express but weren't migrated to `/api/`
   - Routes needed: `/dashboard/teams/:teamId/overview`, `/dashboard/agents/:agentId/overview`, etc.
 
-- [ ] **Update frontend API endpoints to use Vercel**
-  - Description: Frontend currently points to Railway via `VITE_API_URL`
-  - Change: Point to Vercel API routes once they're ready
+- [ ] **Deploy to Vercel production**
+  - Description: Once preview deployment verified, merge to main and deploy production
 
 ### Medium Priority
 
@@ -50,6 +52,13 @@ Vercel migration - fixing runtime errors and completing API migration
 ---
 
 ## ✅ Done
+
+### Session 42 (2026-01-22)
+- [x] Tested Vercel deployment and identified missing env vars
+- [x] Added backend environment variables to Vercel (SUPABASE_URL, etc.)
+- [x] Removed VITE_API_URL — frontend now uses Vercel API routes
+- [x] Fixed auth API response format (wrapped in `data` object)
+- [x] Fixed AuthContext to handle `full_name` field from Vercel API
 
 ### Session 41 (2026-01-22)
 - [x] Added Sentry branch tagging for Vercel deployments

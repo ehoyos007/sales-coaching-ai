@@ -51,11 +51,13 @@ interface AuthProviderProps {
 
 // Helper function to create combined user from auth user and profile
 function createCombinedUser(authUser: AuthUser, profile: UserProfile): CombinedUser {
-  const fullName = profile.first_name
-    ? profile.last_name
-      ? `${profile.first_name} ${profile.last_name}`
-      : profile.first_name
-    : null;
+  // Handle both full_name (from Vercel API) and first_name/last_name (legacy)
+  const fullName = (profile as { full_name?: string }).full_name
+    ?? (profile.first_name
+      ? profile.last_name
+        ? `${profile.first_name} ${profile.last_name}`
+        : profile.first_name
+      : null);
 
   return {
     id: authUser.id,
