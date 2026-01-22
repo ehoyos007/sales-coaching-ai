@@ -10,7 +10,14 @@ export function initSentry(): void {
 
   Sentry.init({
     dsn,
-    environment: import.meta.env.MODE,
+    environment: import.meta.env.VITE_VERCEL_ENV || import.meta.env.MODE,
+
+    // Add branch info for filtering errors by deployment
+    initialScope: {
+      tags: {
+        branch: import.meta.env.VITE_VERCEL_GIT_COMMIT_REF || 'unknown',
+      },
+    },
 
     // Performance monitoring
     tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
@@ -32,6 +39,9 @@ export function initSentry(): void {
       }
       return event;
     },
+
+    // Release version includes commit SHA for source maps
+    release: `sales-coaching-ai@${import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA || 'dev'}`,
   });
 
   console.log('Sentry: Initialized');
