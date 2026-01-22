@@ -1,5 +1,39 @@
 # PROGRESS.md
 
+## 2026-01-22 — Session 39
+
+### Summary
+Attempted Vercel migration (Phase 1), deployment failed. Reverted main branch and established feature branch workflow for safer iteration.
+
+### Completed
+- [x] Created Vercel serverless API structure (`/api/v1/`) with 24+ route files
+- [x] Built shared library (`/lib/`) with 12 service modules
+- [x] Fixed TypeScript errors and tested locally with `vercel dev`
+- [x] Deployed to Vercel - **deployment failed** (build issues)
+- [x] Reverted `main` branch to last working commit (cd81c4c)
+- [x] Created `feature/vercel-migration` branch for continued development
+- [x] Created `CLAUDE.md` with git branching strategy documentation
+
+### Git Changes
+- `main` branch: force pushed back to cd81c4c (stable)
+- `feature/vercel-migration`: created from cd81c4c for development
+- `broken-main-backup`: preserved failed code at 724d694
+
+### Files Created (on feature branch)
+- `CLAUDE.md` — Project instructions with git branching strategy
+
+### Decisions Made
+- **Branch protection**: All development now happens on feature branches, not main
+- **Incremental approach**: Will test deployments on feature branch before merging to main
+- **Railway remains primary**: Keep Railway deployment on main until Vercel is proven stable
+
+### Next Steps
+- [ ] Continue Vercel migration work on `feature/vercel-migration` branch
+- [ ] Debug deployment issues incrementally
+- [ ] Only merge to main after successful Vercel deployment from feature branch
+
+---
+
 ## 2026-01-21 — Session 36
 
 ### Summary
