@@ -51,6 +51,15 @@ Vercel migration - fixing runtime errors and completing API migration
 
 ## ✅ Done
 
+### Session 41 (2026-01-22)
+- [x] Added Sentry branch tagging for Vercel deployments
+  - Server and client configs updated with `initialScope.tags.branch`
+  - Release format now includes commit SHA
+  - Vite config exposes Vercel env vars to client
+- [x] Fixed main branch deployment failure
+  - Root cause: `getTeams` import should be `getAdminTeams` in Sidebar.tsx
+  - Commit `c1a7664` applied to main
+
 ### Session 40 (2026-01-22)
 - [x] Fixed Vercel runtime errors in Supabase RPC functions
   - Applied migration to change UUID parameters to TEXT

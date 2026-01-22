@@ -1,5 +1,44 @@
 # PROGRESS.md
 
+## 2026-01-22 — Session 41
+
+### Summary
+Added Sentry branch tagging for Vercel deployments and fixed build error on main branch.
+
+### Completed
+- [x] Added Sentry branch tagging configuration to both server and client
+- [x] Updated `src/lib/sentry.ts` with `initialScope.tags.branch` and improved release format
+- [x] Updated `client/src/lib/sentry.ts` with same branch tagging
+- [x] Updated `client/vite.config.ts` to expose Vercel env vars (`VERCEL_ENV`, `VERCEL_GIT_COMMIT_REF`, `VERCEL_GIT_COMMIT_SHA`)
+- [x] Cherry-picked Sentry changes to both `main` and `feature/vercel-migration` branches
+- [x] Debugged failed main branch deployment (TypeScript build error)
+- [x] Fixed `getTeams` → `getAdminTeams` import in `Sidebar.tsx` on main branch
+- [x] Verified main branch deployment succeeded
+
+### Files Changed
+- `src/lib/sentry.ts` — Added branch tag, `VERCEL_ENV` environment, commit SHA in release
+- `client/src/lib/sentry.ts` — Same changes for client-side Sentry
+- `client/vite.config.ts` — Added `define` block to expose Vercel environment variables
+- `client/src/components/Sidebar/Sidebar.tsx` — Fixed import (main branch only)
+
+### Git Activity
+| Branch | Commits |
+|--------|---------|
+| `feature/vercel-migration` | `12b67c8` — Sentry branch tagging |
+| `main` | `546a611` — Sentry branch tagging (cherry-pick) |
+| `main` | `c1a7664` — Fix getTeams import |
+
+### Decisions Made
+- **Sentry tagging**: Using `VERCEL_GIT_COMMIT_REF` for branch filtering in Sentry dashboard
+- **Release format**: `sales-coaching-ai@{commit_sha}` for better source map correlation
+
+### Next Steps
+- [ ] Add dashboard routes to Vercel serverless functions
+- [ ] Update frontend API endpoints to use Vercel
+- [ ] Test full Vercel deployment end-to-end
+
+---
+
 ## 2026-01-22 — Session 40
 
 ### Summary
