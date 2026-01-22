@@ -136,8 +136,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Footer */}
         <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 space-y-2">
 
-          {/* Team Overview link - manager only */}
-          {user?.role === 'manager' && user?.teamId && (
+          {/* Team Overview link - admin and manager */}
+          {(user?.role === 'admin' || user?.role === 'manager') && user?.teamId && (
             <Link
               to={`/teams/${user.teamId}/overview`}
               className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
